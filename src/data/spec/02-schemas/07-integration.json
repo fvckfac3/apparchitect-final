@@ -1,0 +1,385 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apparchitect.dev/schemas/07-integration.schema.json",
+
+  "title": "AppArchitect Integration Schema",
+
+  "description": "Canonical integration contract defining external systems, APIs, authentication flows, event bridges, data pipelines, and third-party service connectivity for AppArchitect projects.",
+
+  "type": "object",
+
+  "required": [
+    "metadata",
+    "references",
+    "content"
+  ],
+
+  "properties": {
+
+    "metadata": {
+      "$ref": "#/$defs/artifactMetadata"
+    },
+
+    "references": {
+      "$ref": "#/$defs/referenceModel"
+    },
+
+    "content": {
+      "$ref": "#/$defs/integrationContent"
+    }
+  },
+
+  "$defs": {
+
+    "artifactMetadata": {
+      "type": "object",
+      "required": [
+        "id",
+        "artifact_type",
+        "name",
+        "version",
+        "status",
+        "owner",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+
+        "id": {
+          "type": "string",
+          "pattern": "^integration_[a-zA-Z0-9_-]+$"
+        },
+
+        "artifact_type": {
+          "const": "integration"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "version": {
+      "type": "object",
+      "required": ["major", "minor", "patch"],
+      "properties": {
+        "major": { "type": "integer" },
+        "minor": { "type": "integer" },
+        "patch": { "type": "integer" }
+      }
+    },
+
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_progress",
+        "configured",
+        "validated",
+        "active",
+        "error",
+        "deprecated"
+      ]
+    },
+
+    "owner": {
+      "type": "string",
+      "enum": [
+        "Integration Agent",
+        "Backend Agent",
+        "Security Agent",
+        "Governance Layer"
+      ]
+    },
+
+    "referenceModel": {
+      "type": "object",
+      "properties": {
+
+        "source_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "dependent_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "validation_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "integrationContent": {
+      "type": "object",
+
+      "required": [
+        "integration_id",
+        "name",
+        "integration_type",
+        "auth",
+        "endpoints",
+        "data_contracts"
+      ],
+
+      "properties": {
+
+        "integration_id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "integration_type": {
+          "type": "string",
+          "enum": [
+            "rest_api",
+            "graphql",
+            "webhook",
+            "database",
+            "event_bus",
+            "third_party_sdk",
+            "ai_service",
+            "custom_connector"
+          ]
+        },
+
+        "description": {
+          "type": "string"
+        },
+
+        "auth": {
+          "$ref": "#/$defs/authModel"
+        },
+
+        "base_url": {
+          "type": "string"
+        },
+
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/endpoint"
+          }
+        },
+
+        "data_contracts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dataContract"
+          }
+        },
+
+        "event_mapping": {
+          "$ref": "#/$defs/eventMapping"
+        },
+
+        "rate_limits": {
+          "$ref": "#/$defs/rateLimits"
+        },
+
+        "retry_policy": {
+          "$ref": "#/$defs/retryPolicy"
+        },
+
+        "health_check": {
+          "$ref": "#/$defs/healthCheck"
+        }
+      }
+    },
+
+    "authModel": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+
+        "type": {
+          "type": "string",
+          "enum": [
+            "none",
+            "api_key",
+            "oauth2",
+            "bearer_token",
+            "basic_auth",
+            "signed_request"
+          ]
+        },
+
+        "credentials_ref": {
+          "type": "string"
+        },
+
+        "token_refresh": {
+          "type": "boolean"
+        }
+      }
+    },
+
+    "endpoint": {
+      "type": "object",
+      "required": ["name", "path", "method"],
+      "properties": {
+
+        "name": {
+          "type": "string"
+        },
+
+        "path": {
+          "type": "string"
+        },
+
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+        },
+
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+
+        "request_schema_ref": {
+          "type": "string"
+        },
+
+        "response_schema_ref": {
+          "type": "string"
+        },
+
+        "timeout_ms": {
+          "type": "integer"
+        }
+      }
+    },
+
+    "dataContract": {
+      "type": "object",
+      "required": ["name", "direction"],
+      "properties": {
+
+        "name": {
+          "type": "string"
+        },
+
+        "direction": {
+          "type": "string",
+          "enum": [
+            "inbound",
+            "outbound",
+            "bidirectional"
+          ]
+        },
+
+        "schema_ref": {
+          "type": "string"
+        }
+      }
+    },
+
+    "eventMapping": {
+      "type": "object",
+      "properties": {
+
+        "on_request": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "on_response": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "on_error": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "rateLimits": {
+      "type": "object",
+      "properties": {
+
+        "requests_per_minute": {
+          "type": "integer"
+        },
+
+        "requests_per_day": {
+          "type": "integer"
+        },
+
+        "burst_limit": {
+          "type": "integer"
+        }
+      }
+    },
+
+    "retryPolicy": {
+      "type": "object",
+      "properties": {
+
+        "max_retries": {
+          "type": "integer"
+        },
+
+        "backoff_strategy": {
+          "type": "string",
+          "enum": [
+            "linear",
+            "exponential",
+            "fixed"
+          ]
+        }
+      }
+    },
+
+    "healthCheck": {
+      "type": "object",
+      "properties": {
+
+        "enabled": {
+          "type": "boolean"
+        },
+
+        "endpoint": {
+          "type": "string"
+        },
+
+        "interval_seconds": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

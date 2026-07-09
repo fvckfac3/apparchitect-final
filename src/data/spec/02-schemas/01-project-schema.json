@@ -1,0 +1,776 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apparchitect.dev/schemas/01-project-schema.schema.json",
+  "title": "AppArchitect Project Schema",
+  "description": "Canonical source-of-truth contract for all AppArchitect project generation workflows.",
+  "type": "object",
+
+  "required": [
+    "metadata",
+    "references",
+    "content"
+  ],
+
+  "properties": {
+
+    "metadata": {
+      "$ref": "#/$defs/artifactMetadata"
+    },
+
+    "references": {
+      "$ref": "#/$defs/referenceModel"
+    },
+
+    "content": {
+      "type": "object",
+
+      "required": [
+        "vision",
+        "market",
+        "personas",
+        "roles",
+        "features",
+        "workflows",
+        "screens",
+        "authentication",
+        "permissions",
+        "data_model",
+        "integrations",
+        "security",
+        "architecture",
+        "infrastructure"
+      ],
+
+      "properties": {
+
+        "vision": {
+          "$ref": "#/$defs/vision"
+        },
+
+        "market": {
+          "$ref": "#/$defs/market"
+        },
+
+        "personas": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/persona"
+          }
+        },
+
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role"
+          }
+        },
+
+        "features": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/feature"
+          }
+        },
+
+        "workflows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/workflow"
+          }
+        },
+
+        "screens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/screen"
+          }
+        },
+
+        "authentication": {
+          "$ref": "#/$defs/authentication"
+        },
+
+        "permissions": {
+          "$ref": "#/$defs/permissions"
+        },
+
+        "data_model": {
+          "$ref": "#/$defs/dataModel"
+        },
+
+        "ai_features": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/aiFeature"
+          }
+        },
+
+        "integrations": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/integration"
+          }
+        },
+
+        "monetization": {
+          "$ref": "#/$defs/monetization"
+        },
+
+        "analytics": {
+          "$ref": "#/$defs/analytics"
+        },
+
+        "security": {
+          "$ref": "#/$defs/security"
+        },
+
+        "architecture": {
+          "$ref": "#/$defs/architecture"
+        },
+
+        "infrastructure": {
+          "$ref": "#/$defs/infrastructure"
+        },
+
+        "non_functional_requirements": {
+          "$ref": "#/$defs/nonFunctionalRequirements"
+        },
+
+        "launch_strategy": {
+          "$ref": "#/$defs/launchStrategy"
+        },
+
+        "roadmap": {
+          "$ref": "#/$defs/roadmap"
+        }
+      }
+    }
+  },
+
+  "$defs": {
+
+    "artifactMetadata": {
+      "type": "object",
+
+      "required": [
+        "id",
+        "artifact_type",
+        "name",
+        "version",
+        "status",
+        "owner",
+        "created_at",
+        "updated_at"
+      ],
+
+      "properties": {
+
+        "id": {
+          "type": "string",
+          "minLength": 3
+        },
+
+        "artifact_type": {
+          "const": "project_schema"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "version": {
+      "type": "object",
+
+      "required": [
+        "major",
+        "minor",
+        "patch"
+      ],
+
+      "properties": {
+
+        "major": {
+          "type": "integer",
+          "minimum": 0
+        },
+
+        "minor": {
+          "type": "integer",
+          "minimum": 0
+        },
+
+        "patch": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+
+    "status": {
+      "type": "string",
+
+      "enum": [
+        "draft",
+        "in_progress",
+        "generated",
+        "validated",
+        "approved",
+        "exported",
+        "deprecated"
+      ]
+    },
+
+    "owner": {
+      "type": "string",
+
+      "enum": [
+        "Discovery Agent",
+        "Schema Agent",
+        "Architecture Agent",
+        "Workflow Agent",
+        "UX Agent",
+        "Documentation Agent",
+        "Validation Agent",
+        "Export Agent",
+        "Governance Layer"
+      ]
+    },
+
+    "referenceModel": {
+      "type": "object",
+
+      "properties": {
+
+        "source_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "dependent_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "validation_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "vision": {
+      "type": "object",
+
+      "required": [
+        "problem_statement",
+        "solution_statement",
+        "value_proposition"
+      ],
+
+      "properties": {
+
+        "problem_statement": {
+          "type": "string"
+        },
+
+        "solution_statement": {
+          "type": "string"
+        },
+
+        "value_proposition": {
+          "type": "string"
+        },
+
+        "mission": {
+          "type": "string"
+        },
+
+        "success_definition": {
+          "type": "string"
+        }
+      }
+    },
+
+    "market": {
+      "type": "object",
+
+      "properties": {
+
+        "industry": {
+          "type": "string"
+        },
+
+        "target_market": {
+          "type": "string"
+        },
+
+        "competitive_landscape": {
+          "type": "string"
+        },
+
+        "positioning": {
+          "type": "string"
+        }
+      }
+    },
+
+    "persona": {
+      "type": "object",
+
+      "required": [
+        "id",
+        "name"
+      ],
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "pain_points": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "role": {
+      "type": "object",
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "feature": {
+      "type": "object",
+
+      "required": [
+        "id",
+        "name",
+        "priority"
+      ],
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        },
+
+        "priority": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ]
+        }
+      }
+    },
+
+    "workflow": {
+      "type": "object",
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "screen": {
+      "type": "object",
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "route": {
+          "type": "string"
+        }
+      }
+    },
+
+    "authentication": {
+      "type": "object",
+
+      "properties": {
+
+        "enabled": {
+          "type": "boolean"
+        },
+
+        "providers": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "email",
+              "google",
+              "apple",
+              "github",
+              "microsoft",
+              "custom"
+            ]
+          }
+        }
+      }
+    },
+
+    "permissions": {
+      "type": "object",
+
+      "properties": {
+
+        "rbac_enabled": {
+          "type": "boolean"
+        },
+
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "dataModel": {
+      "type": "object",
+
+      "properties": {
+
+        "entities": {
+          "type": "array"
+        },
+
+        "relationships": {
+          "type": "array"
+        }
+      }
+    },
+
+    "aiFeature": {
+      "type": "object",
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "model_provider": {
+          "type": "string"
+        }
+      }
+    },
+
+    "integration": {
+      "type": "object",
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "provider": {
+          "type": "string"
+        },
+
+        "category": {
+          "type": "string"
+        }
+      }
+    },
+
+    "monetization": {
+      "type": "object",
+
+      "properties": {
+
+        "enabled": {
+          "type": "boolean"
+        },
+
+        "model": {
+          "enum": [
+            "subscription",
+            "one_time",
+            "freemium",
+            "usage_based",
+            "marketplace",
+            "advertising"
+          ]
+        }
+      }
+    },
+
+    "analytics": {
+      "type": "object",
+
+      "properties": {
+
+        "enabled": {
+          "type": "boolean"
+        },
+
+        "events": {
+          "type": "array"
+        }
+      }
+    },
+
+    "security": {
+      "type": "object",
+
+      "properties": {
+
+        "encryption_at_rest": {
+          "type": "boolean"
+        },
+
+        "encryption_in_transit": {
+          "type": "boolean"
+        },
+
+        "compliance": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "SOC2",
+              "HIPAA",
+              "GDPR",
+              "CCPA",
+              "PCI_DSS"
+            ]
+          }
+        }
+      }
+    },
+
+    "architecture": {
+      "type": "object",
+
+      "properties": {
+
+        "frontend": {
+          "type": "string"
+        },
+
+        "backend": {
+          "type": "string"
+        },
+
+        "database": {
+          "type": "string"
+        }
+      }
+    },
+
+    "infrastructure": {
+      "type": "object",
+
+      "properties": {
+
+        "cloud_provider": {
+          "type": "string"
+        },
+
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "nonFunctionalRequirements": {
+      "type": "object",
+
+      "properties": {
+
+        "availability": {
+          "type": "string"
+        },
+
+        "performance": {
+          "type": "string"
+        },
+
+        "scalability": {
+          "type": "string"
+        }
+      }
+    },
+
+    "launchStrategy": {
+      "type": "object",
+
+      "properties": {
+
+        "launch_type": {
+          "type": "string"
+        },
+
+        "success_metrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "roadmap": {
+      "type": "array",
+
+      "items": {
+        "type": "object",
+
+        "properties": {
+
+          "phase": {
+            "type": "string"
+          },
+
+          "objectives": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "metadata": {
+        "id": "project_apparchitect",
+        "artifact_type": "project_schema",
+        "name": "AppArchitect",
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+        "status": "approved",
+        "owner": "Schema Agent",
+        "created_at": "2026-06-17T00:00:00Z",
+        "updated_at": "2026-06-17T00:00:00Z"
+      },
+
+      "references": {},
+
+      "content": {
+        "vision": {
+          "problem_statement": "Founders struggle to convert ideas into build-ready systems.",
+          "solution_statement": "AI Product Architect platform.",
+          "value_proposition": "Idea to build package."
+        },
+
+        "features": [
+          {
+            "id": "discovery",
+            "name": "Discovery Engine",
+            "priority": "critical"
+          }
+        ]
+      }
+    }
+  ]
+}

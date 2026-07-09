@@ -1,0 +1,9 @@
+# Bridge is auto-generated from AppArchitect-Foundation.
+# Run `bash scripts/sync-spec.sh` to refresh. The contents of this
+# directory are tracked so the app builds without the Foundation present
+# at build time, but the canonical source is the Foundation workspace.
+
+# Ignore the foundation's node_modules-style bloat if it ever gets copied
+node_modules/
+.DS_Store
+*.swp

@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apparchitect.dev/schemas/09-validation-result.schema.json",
+
+  "title": "AppArchitect Validation Result Schema",
+
+  "description": "Canonical validation contract defining how artifacts are evaluated against PRD requirements, feature constraints, system rules, and quality metrics.",
+
+  "type": "object",
+
+  "required": [
+    "metadata",
+    "references",
+    "content"
+  ],
+
+  "properties": {
+
+    "metadata": {
+      "$ref": "#/$defs/artifactMetadata"
+    },
+
+    "references": {
+      "$ref": "#/$defs/referenceModel"
+    },
+
+    "content": {
+      "$ref": "#/$defs/validationContent"
+    }
+  },
+
+  "$defs": {
+
+    "artifactMetadata": {
+      "type": "object",
+      "required": [
+        "id",
+        "artifact_type",
+        "name",
+        "version",
+        "status",
+        "owner",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+
+        "id": {
+          "type": "string",
+          "pattern": "^validation_[a-zA-Z0-9_-]+$"
+        },
+
+        "artifact_type": {
+          "const": "validation_result"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "version": {
+      "type": "object",
+      "required": ["major", "minor", "patch"],
+      "properties": {
+        "major": { "type": "integer" },
+        "minor": { "type": "integer" },
+        "patch": { "type": "integer" }
+      }
+    },
+
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "running",
+        "pass",
+        "fail",
+        "partial",
+        "blocked",
+        "deprecated"
+      ]
+    },
+
+    "owner": {
+      "type": "string",
+      "enum": [
+        "Validation Agent",
+        "Governance Layer",
+        "QA Agent",
+        "System Auditor"
+      ]
+    },
+
+    "referenceModel": {
+      "type": "object",
+      "properties": {
+
+        "source_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "dependent_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "validation_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "validationContent": {
+      "type": "object",
+
+      "required": [
+        "artifact_id",
+        "feature_id",
+        "status",
+        "score",
+        "issues",
+        "metrics"
+      ],
+
+      "properties": {
+
+        "artifact_id": {
+          "type": "string"
+        },
+
+        "feature_id": {
+          "type": "string"
+        },
+
+        "status": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "partial",
+            "blocked"
+          ]
+        },
+
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+
+        "rule_set_version": {
+          "type": "string"
+        },
+
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/issue"
+          }
+        },
+
+        "metrics": {
+          "$ref": "#/$defs/metrics"
+        },
+
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "auto_fixable": {
+          "type": "boolean"
+        },
+
+        "checked_by": {
+          "type": "string"
+        },
+
+        "checked_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "issue": {
+      "type": "object",
+      "required": [
+        "severity",
+        "message",
+        "location",
+        "rule_id"
+      ],
+      "properties": {
+
+        "severity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+
+        "message": {
+          "type": "string"
+        },
+
+        "location": {
+          "type": "string"
+        },
+
+        "rule_id": {
+          "type": "string"
+        }
+      }
+    },
+
+    "metrics": {
+      "type": "object",
+      "properties": {
+
+        "completeness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+
+        "consistency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+
+        "compliance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+
+        "clarity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+
+        "security": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    }
+  }
+}

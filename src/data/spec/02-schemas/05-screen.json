@@ -1,0 +1,588 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apparchitect.dev/schemas/05-screen.schema.json",
+
+  "title": "AppArchitect Screen Schema",
+
+  "description": "Canonical screen definition contract. Defines application screens, layouts, navigation, UX behavior, responsive design requirements, components, states, actions, and screen-level architecture.",
+
+  "type": "object",
+
+  "required": [
+    "metadata",
+    "references",
+    "content"
+  ],
+
+  "properties": {
+
+    "metadata": {
+      "$ref": "#/$defs/artifactMetadata"
+    },
+
+    "references": {
+      "$ref": "#/$defs/referenceModel"
+    },
+
+    "content": {
+      "$ref": "#/$defs/screenContent"
+    }
+  },
+
+  "$defs": {
+
+    "artifactMetadata": {
+
+      "type": "object",
+
+      "required": [
+        "id",
+        "artifact_type",
+        "name",
+        "version",
+        "status",
+        "owner",
+        "created_at",
+        "updated_at"
+      ],
+
+      "properties": {
+
+        "id": {
+          "type": "string",
+          "pattern": "^screen_[a-zA-Z0-9_-]+$"
+        },
+
+        "artifact_type": {
+          "const": "screen"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "version": {
+
+      "type": "object",
+
+      "required": [
+        "major",
+        "minor",
+        "patch"
+      ],
+
+      "properties": {
+
+        "major": {
+          "type": "integer"
+        },
+
+        "minor": {
+          "type": "integer"
+        },
+
+        "patch": {
+          "type": "integer"
+        }
+      }
+    },
+
+    "status": {
+
+      "type": "string",
+
+      "enum": [
+        "draft",
+        "in_progress",
+        "generated",
+        "validated",
+        "approved",
+        "exported",
+        "deprecated"
+      ]
+    },
+
+    "owner": {
+
+      "type": "string",
+
+      "enum": [
+        "UX Agent",
+        "Workflow Agent",
+        "Documentation Agent",
+        "Governance Layer"
+      ]
+    },
+
+    "referenceModel": {
+
+      "type": "object",
+
+      "properties": {
+
+        "source_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "dependent_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "validation_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "screenContent": {
+
+      "type": "object",
+
+      "required": [
+        "screen_id",
+        "screen_name",
+        "screen_type",
+        "route",
+        "purpose",
+        "components"
+      ],
+
+      "properties": {
+
+        "screen_id": {
+          "type": "string"
+        },
+
+        "screen_name": {
+          "type": "string"
+        },
+
+        "screen_type": {
+
+          "enum": [
+            "landing",
+            "authentication",
+            "dashboard",
+            "settings",
+            "list",
+            "detail",
+            "form",
+            "wizard",
+            "analytics",
+            "admin",
+            "profile",
+            "onboarding",
+            "modal",
+            "utility",
+            "custom"
+          ]
+        },
+
+        "route": {
+          "type": "string"
+        },
+
+        "purpose": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        },
+
+        "access_roles": {
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "entry_points": {
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "exit_points": {
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "components": {
+
+          "type": "array",
+
+          "minItems": 1,
+
+          "items": {
+            "$ref": "#/$defs/component"
+          }
+        },
+
+        "navigation": {
+          "$ref": "#/$defs/navigation"
+        },
+
+        "responsive_layout": {
+          "$ref": "#/$defs/responsiveLayout"
+        },
+
+        "states": {
+
+          "type": "array",
+
+          "items": {
+            "$ref": "#/$defs/screenState"
+          }
+        },
+
+        "user_actions": {
+
+          "type": "array",
+
+          "items": {
+            "$ref": "#/$defs/userAction"
+          }
+        },
+
+        "api_dependencies": {
+
+          "type": "array",
+
+          "items": {
+            "$ref": "#/$defs/apiDependency"
+          }
+        },
+
+        "analytics_events": {
+
+          "type": "array",
+
+          "items": {
+            "$ref": "#/$defs/analyticsEvent"
+          }
+        },
+
+        "accessibility": {
+          "$ref": "#/$defs/accessibility"
+        },
+
+        "design_system": {
+          "$ref": "#/$defs/designSystem"
+        },
+
+        "performance_requirements": {
+          "$ref": "#/$defs/performanceRequirements"
+        }
+      }
+    },
+
+    "component": {
+
+      "type": "object",
+
+      "required": [
+        "component_id",
+        "component_name",
+        "component_type"
+      ],
+
+      "properties": {
+
+        "component_id": {
+          "type": "string"
+        },
+
+        "component_name": {
+          "type": "string"
+        },
+
+        "component_type": {
+
+          "enum": [
+            "button",
+            "input",
+            "textarea",
+            "dropdown",
+            "checkbox",
+            "radio",
+            "table",
+            "card",
+            "chart",
+            "modal",
+            "navigation",
+            "tabs",
+            "form",
+            "list",
+            "custom"
+          ]
+        },
+
+        "required": {
+          "type": "boolean"
+        }
+      }
+    },
+
+    "navigation": {
+
+      "type": "object",
+
+      "properties": {
+
+        "previous_screen": {
+          "type": "string"
+        },
+
+        "next_screens": {
+          "type": "array"
+        },
+
+        "breadcrumbs_enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+
+    "responsiveLayout": {
+
+      "type": "object",
+
+      "properties": {
+
+        "mobile": {
+          "$ref": "#/$defs/breakpoint"
+        },
+
+        "tablet": {
+          "$ref": "#/$defs/breakpoint"
+        },
+
+        "desktop": {
+          "$ref": "#/$defs/breakpoint"
+        }
+      }
+    },
+
+    "breakpoint": {
+
+      "type": "object",
+
+      "properties": {
+
+        "columns": {
+          "type": "integer"
+        },
+
+        "layout_strategy": {
+          "type": "string"
+        }
+      }
+    },
+
+    "screenState": {
+
+      "type": "object",
+
+      "properties": {
+
+        "state_name": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+
+    "userAction": {
+
+      "type": "object",
+
+      "properties": {
+
+        "action_name": {
+          "type": "string"
+        },
+
+        "result": {
+          "type": "string"
+        }
+      }
+    },
+
+    "apiDependency": {
+
+      "type": "object",
+
+      "properties": {
+
+        "service": {
+          "type": "string"
+        },
+
+        "endpoint": {
+          "type": "string"
+        },
+
+        "method": {
+
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        }
+      }
+    },
+
+    "analyticsEvent": {
+
+      "type": "object",
+
+      "properties": {
+
+        "event_name": {
+          "type": "string"
+        },
+
+        "trigger": {
+          "type": "string"
+        }
+      }
+    },
+
+    "accessibility": {
+
+      "type": "object",
+
+      "properties": {
+
+        "wcag_level": {
+
+          "enum": [
+            "A",
+            "AA",
+            "AAA"
+          ]
+        },
+
+        "keyboard_navigation": {
+          "type": "boolean"
+        },
+
+        "screen_reader_support": {
+          "type": "boolean"
+        }
+      }
+    },
+
+    "designSystem": {
+
+      "type": "object",
+
+      "properties": {
+
+        "theme": {
+          "type": "string"
+        },
+
+        "component_library": {
+          "type": "string"
+        }
+      }
+    },
+
+    "performanceRequirements": {
+
+      "type": "object",
+
+      "properties": {
+
+        "max_load_time_ms": {
+          "type": "integer"
+        },
+
+        "lazy_loading_enabled": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "metadata": {
+        "id": "screen_discovery_interview",
+        "artifact_type": "screen",
+        "name": "Discovery Interview Screen"
+      },
+
+      "content": {
+
+        "screen_id": "SCR-001",
+
+        "screen_name": "Discovery Interview",
+
+        "screen_type": "wizard",
+
+        "route": "/discovery",
+
+        "purpose": "Collect founder requirements",
+
+        "components": [
+          {
+            "component_id": "cmp_question",
+            "component_name": "Question Input",
+            "component_type": "textarea"
+          }
+        ]
+      }
+    }
+  ]
+}

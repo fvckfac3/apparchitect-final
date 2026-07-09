@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" fill="currentColor" aria-label="AppArchitect">
+  <g>
+    <path d="M6 44 L24 6 L42 44" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M12 32 L36 32" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    <rect x="22" y="4" width="4" height="4"/>
+  </g>
+  <text x="56" y="33" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="700" font-size="22" letter-spacing="-0.02em" fill="currentColor">AppArchitect</text>
+</svg>

@@ -1,0 +1,558 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apparchitect.dev/schemas/06-persona.schema.json",
+
+  "title": "AppArchitect Persona Schema",
+
+  "description": "Canonical persona contract used for user modeling, stakeholder analysis, role mapping, workflow generation, UX prioritization, feature validation, and documentation generation.",
+
+  "type": "object",
+
+  "required": [
+    "metadata",
+    "references",
+    "content"
+  ],
+
+  "properties": {
+
+    "metadata": {
+      "$ref": "#/$defs/artifactMetadata"
+    },
+
+    "references": {
+      "$ref": "#/$defs/referenceModel"
+    },
+
+    "content": {
+      "$ref": "#/$defs/personaContent"
+    }
+  },
+
+  "$defs": {
+
+    "artifactMetadata": {
+
+      "type": "object",
+
+      "required": [
+        "id",
+        "artifact_type",
+        "name",
+        "version",
+        "status",
+        "owner",
+        "created_at",
+        "updated_at"
+      ],
+
+      "properties": {
+
+        "id": {
+          "type": "string",
+          "pattern": "^persona_[a-zA-Z0-9_-]+$"
+        },
+
+        "artifact_type": {
+          "const": "persona"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "version": {
+
+      "type": "object",
+
+      "required": [
+        "major",
+        "minor",
+        "patch"
+      ],
+
+      "properties": {
+
+        "major": {
+          "type": "integer"
+        },
+
+        "minor": {
+          "type": "integer"
+        },
+
+        "patch": {
+          "type": "integer"
+        }
+      }
+    },
+
+    "status": {
+
+      "type": "string",
+
+      "enum": [
+        "draft",
+        "in_progress",
+        "generated",
+        "validated",
+        "approved",
+        "exported",
+        "deprecated"
+      ]
+    },
+
+    "owner": {
+
+      "type": "string",
+
+      "enum": [
+        "Discovery Agent",
+        "UX Agent",
+        "Documentation Agent",
+        "Schema Agent",
+        "Governance Layer"
+      ]
+    },
+
+    "referenceModel": {
+
+      "type": "object",
+
+      "properties": {
+
+        "source_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "dependent_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "validation_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "personaContent": {
+
+      "type": "object",
+
+      "required": [
+        "persona_id",
+        "persona_name",
+        "persona_type",
+        "summary",
+        "goals",
+        "pain_points"
+      ],
+
+      "properties": {
+
+        "persona_id": {
+          "type": "string"
+        },
+
+        "persona_name": {
+          "type": "string"
+        },
+
+        "persona_type": {
+
+          "enum": [
+            "primary_user",
+            "secondary_user",
+            "administrator",
+            "stakeholder",
+            "operator",
+            "manager",
+            "executive",
+            "developer",
+            "external_partner"
+          ]
+        },
+
+        "summary": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        },
+
+        "role": {
+          "type": "string"
+        },
+
+        "experience_level": {
+
+          "enum": [
+            "beginner",
+            "intermediate",
+            "advanced",
+            "expert"
+          ]
+        },
+
+        "goals": {
+
+          "type": "array",
+
+          "minItems": 1,
+
+          "items": {
+            "$ref": "#/$defs/goal"
+          }
+        },
+
+        "pain_points": {
+
+          "type": "array",
+
+          "minItems": 1,
+
+          "items": {
+            "$ref": "#/$defs/painPoint"
+          }
+        },
+
+        "motivations": {
+
+          "type": "array",
+
+          "items": {
+            "$ref": "#/$defs/motivation"
+          }
+        },
+
+        "frustrations": {
+
+          "type": "array",
+
+          "items": {
+            "$ref": "#/$defs/frustration"
+          }
+        },
+
+        "permissions": {
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "responsibilities": {
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "primary_workflows": {
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "feature_priorities": {
+
+          "type": "array",
+
+          "items": {
+            "$ref": "#/$defs/featurePriority"
+          }
+        },
+
+        "success_metrics": {
+
+          "type": "array",
+
+          "items": {
+            "$ref": "#/$defs/successMetric"
+          }
+        },
+
+        "behavioral_profile": {
+          "$ref": "#/$defs/behavioralProfile"
+        },
+
+        "journey": {
+          "$ref": "#/$defs/userJourney"
+        },
+
+        "accessibility_needs": {
+          "$ref": "#/$defs/accessibilityNeeds"
+        },
+
+        "assumptions": {
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "goal": {
+
+      "type": "object",
+
+      "properties": {
+
+        "goal_id": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        },
+
+        "priority": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ]
+        }
+      }
+    },
+
+    "painPoint": {
+
+      "type": "object",
+
+      "properties": {
+
+        "pain_point_id": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        },
+
+        "severity": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ]
+        }
+      }
+    },
+
+    "motivation": {
+
+      "type": "object",
+
+      "properties": {
+
+        "motivation_id": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+
+    "frustration": {
+
+      "type": "object",
+
+      "properties": {
+
+        "frustration_id": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+
+    "featurePriority": {
+
+      "type": "object",
+
+      "properties": {
+
+        "feature_id": {
+          "type": "string"
+        },
+
+        "priority": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ]
+        }
+      }
+    },
+
+    "successMetric": {
+
+      "type": "object",
+
+      "properties": {
+
+        "metric_name": {
+          "type": "string"
+        },
+
+        "target": {
+          "type": "string"
+        }
+      }
+    },
+
+    "behavioralProfile": {
+
+      "type": "object",
+
+      "properties": {
+
+        "decision_style": {
+          "type": "string"
+        },
+
+        "technology_comfort": {
+          "type": "string"
+        },
+
+        "risk_tolerance": {
+          "type": "string"
+        },
+
+        "engagement_pattern": {
+          "type": "string"
+        }
+      }
+    },
+
+    "userJourney": {
+
+      "type": "object",
+
+      "properties": {
+
+        "entry_point": {
+          "type": "string"
+        },
+
+        "key_milestones": {
+          "type": "array"
+        },
+
+        "desired_outcome": {
+          "type": "string"
+        }
+      }
+    },
+
+    "accessibilityNeeds": {
+
+      "type": "object",
+
+      "properties": {
+
+        "screen_reader_support": {
+          "type": "boolean"
+        },
+
+        "keyboard_navigation_required": {
+          "type": "boolean"
+        },
+
+        "high_contrast_required": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "metadata": {
+        "id": "persona_founder",
+        "artifact_type": "persona",
+        "name": "Startup Founder"
+      },
+
+      "content": {
+
+        "persona_id": "P-001",
+
+        "persona_name": "Startup Founder",
+
+        "persona_type": "primary_user",
+
+        "summary": "Founder seeking to transform ideas into build-ready products.",
+
+        "goals": [
+          {
+            "goal_id": "G-001",
+            "description": "Generate complete documentation packages."
+          }
+        ],
+
+        "pain_points": [
+          {
+            "pain_point_id": "PP-001",
+            "description": "Does not know how to structure product requirements.",
+            "severity": "high"
+          }
+        ]
+      }
+    }
+  ]
+}

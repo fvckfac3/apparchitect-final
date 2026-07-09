@@ -1,0 +1,652 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apparchitect.dev/schemas/02-architecture-object.schema.json",
+
+  "title": "AppArchitect Architecture Object Schema",
+  "description": "Canonical architecture contract generated from the Project Schema. Defines system design, services, infrastructure, integrations, security boundaries, deployment strategy, and operational architecture.",
+
+  "type": "object",
+
+  "required": [
+    "metadata",
+    "references",
+    "content"
+  ],
+
+  "properties": {
+
+    "metadata": {
+      "$ref": "#/$defs/artifactMetadata"
+    },
+
+    "references": {
+      "$ref": "#/$defs/referenceModel"
+    },
+
+    "content": {
+
+      "type": "object",
+
+      "required": [
+        "architecture_type",
+        "system_context",
+        "services",
+        "data_architecture",
+        "integration_architecture",
+        "security_architecture",
+        "deployment_architecture"
+      ],
+
+      "properties": {
+
+        "architecture_type": {
+          "type": "string",
+          "enum": [
+            "web_application",
+            "mobile_application",
+            "saas_platform",
+            "marketplace",
+            "ai_platform",
+            "api_platform",
+            "enterprise_platform",
+            "hybrid"
+          ]
+        },
+
+        "system_context": {
+          "$ref": "#/$defs/systemContext"
+        },
+
+        "services": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/service"
+          }
+        },
+
+        "data_architecture": {
+          "$ref": "#/$defs/dataArchitecture"
+        },
+
+        "integration_architecture": {
+          "$ref": "#/$defs/integrationArchitecture"
+        },
+
+        "security_architecture": {
+          "$ref": "#/$defs/securityArchitecture"
+        },
+
+        "deployment_architecture": {
+          "$ref": "#/$defs/deploymentArchitecture"
+        },
+
+        "event_architecture": {
+          "$ref": "#/$defs/eventArchitecture"
+        },
+
+        "analytics_architecture": {
+          "$ref": "#/$defs/analyticsArchitecture"
+        },
+
+        "ai_architecture": {
+          "$ref": "#/$defs/aiArchitecture"
+        },
+
+        "resilience_architecture": {
+          "$ref": "#/$defs/resilienceArchitecture"
+        },
+
+        "scaling_architecture": {
+          "$ref": "#/$defs/scalingArchitecture"
+        },
+
+        "observability_architecture": {
+          "$ref": "#/$defs/observabilityArchitecture"
+        }
+      }
+    }
+  },
+
+  "$defs": {
+
+    "artifactMetadata": {
+
+      "type": "object",
+
+      "required": [
+        "id",
+        "artifact_type",
+        "name",
+        "version",
+        "status",
+        "owner",
+        "created_at",
+        "updated_at"
+      ],
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "artifact_type": {
+          "const": "architecture_object"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "version": {
+
+      "type": "object",
+
+      "properties": {
+
+        "major": {
+          "type": "integer"
+        },
+
+        "minor": {
+          "type": "integer"
+        },
+
+        "patch": {
+          "type": "integer"
+        }
+      }
+    },
+
+    "status": {
+
+      "type": "string",
+
+      "enum": [
+        "draft",
+        "in_progress",
+        "generated",
+        "validated",
+        "approved",
+        "exported",
+        "deprecated"
+      ]
+    },
+
+    "owner": {
+
+      "type": "string",
+
+      "enum": [
+        "Architecture Agent",
+        "Governance Layer"
+      ]
+    },
+
+    "referenceModel": {
+
+      "type": "object",
+
+      "properties": {
+
+        "source_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "dependent_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "validation_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "systemContext": {
+
+      "type": "object",
+
+      "properties": {
+
+        "purpose": {
+          "type": "string"
+        },
+
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "external_systems": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "service": {
+
+      "type": "object",
+
+      "required": [
+        "id",
+        "name",
+        "service_type"
+      ],
+
+      "properties": {
+
+        "id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "service_type": {
+
+          "type": "string",
+
+          "enum": [
+            "frontend",
+            "backend",
+            "api",
+            "database",
+            "worker",
+            "queue",
+            "authentication",
+            "billing",
+            "analytics",
+            "notification",
+            "ai",
+            "integration"
+          ]
+        },
+
+        "description": {
+          "type": "string"
+        },
+
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "owner_agent": {
+          "type": "string"
+        }
+      }
+    },
+
+    "dataArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "database_type": {
+
+          "enum": [
+            "postgresql",
+            "mysql",
+            "mongodb",
+            "dynamodb",
+            "supabase",
+            "firebase",
+            "hybrid"
+          ]
+        },
+
+        "entities": {
+          "type": "array"
+        },
+
+        "relationships": {
+          "type": "array"
+        },
+
+        "data_retention_policy": {
+          "type": "string"
+        }
+      }
+    },
+
+    "integrationArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "providers": {
+
+          "type": "array",
+
+          "items": {
+
+            "type": "object",
+
+            "properties": {
+
+              "provider": {
+                "type": "string"
+              },
+
+              "category": {
+                "type": "string"
+              },
+
+              "authentication_method": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "securityArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "authentication_strategy": {
+          "type": "string"
+        },
+
+        "authorization_strategy": {
+          "type": "string"
+        },
+
+        "encryption_strategy": {
+          "type": "string"
+        },
+
+        "compliance_frameworks": {
+
+          "type": "array",
+
+          "items": {
+
+            "enum": [
+              "SOC2",
+              "HIPAA",
+              "GDPR",
+              "CCPA",
+              "PCI_DSS"
+            ]
+          }
+        }
+      }
+    },
+
+    "deploymentArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "hosting_provider": {
+          "type": "string"
+        },
+
+        "regions": {
+
+          "type": "array",
+
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "deployment_strategy": {
+
+          "enum": [
+            "single_region",
+            "multi_region",
+            "active_passive",
+            "active_active"
+          ]
+        }
+      }
+    },
+
+    "eventArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "event_driven": {
+          "type": "boolean"
+        },
+
+        "event_bus": {
+          "type": "string"
+        },
+
+        "event_types": {
+          "type": "array"
+        }
+      }
+    },
+
+    "analyticsArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "tracking_platform": {
+          "type": "string"
+        },
+
+        "event_tracking_enabled": {
+          "type": "boolean"
+        },
+
+        "reporting_enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+
+    "aiArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "enabled": {
+          "type": "boolean"
+        },
+
+        "providers": {
+
+          "type": "array",
+
+          "items": {
+
+            "enum": [
+              "openai",
+              "anthropic",
+              "google",
+              "meta",
+              "mistral",
+              "custom"
+            ]
+          }
+        },
+
+        "prompt_management": {
+          "type": "string"
+        },
+
+        "model_fallback_strategy": {
+          "type": "string"
+        }
+      }
+    },
+
+    "resilienceArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "backup_strategy": {
+          "type": "string"
+        },
+
+        "recovery_strategy": {
+          "type": "string"
+        },
+
+        "rpo": {
+          "type": "string"
+        },
+
+        "rto": {
+          "type": "string"
+        }
+      }
+    },
+
+    "scalingArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "horizontal_scaling": {
+          "type": "boolean"
+        },
+
+        "auto_scaling": {
+          "type": "boolean"
+        },
+
+        "caching_strategy": {
+          "type": "string"
+        }
+      }
+    },
+
+    "observabilityArchitecture": {
+
+      "type": "object",
+
+      "properties": {
+
+        "logging": {
+          "type": "boolean"
+        },
+
+        "metrics": {
+          "type": "boolean"
+        },
+
+        "tracing": {
+          "type": "boolean"
+        },
+
+        "alerting": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+
+  "examples": [
+
+    {
+
+      "metadata": {
+
+        "id": "architecture_apparchitect",
+
+        "artifact_type": "architecture_object",
+
+        "name": "AppArchitect Architecture",
+
+        "version": {
+          "major": 1,
+          "minor": 0,
+          "patch": 0
+        },
+
+        "status": "approved",
+
+        "owner": "Architecture Agent",
+
+        "created_at": "2026-06-17T00:00:00Z",
+
+        "updated_at": "2026-06-17T00:00:00Z"
+      },
+
+      "references": {},
+
+      "content": {
+
+        "architecture_type": "ai_platform",
+
+        "services": [
+
+          {
+            "id": "svc_discovery",
+            "name": "Discovery Service",
+            "service_type": "ai"
+          },
+
+          {
+            "id": "svc_generation",
+            "name": "Generation Service",
+            "service_type": "backend"
+          }
+        ]
+      }
+    }
+  ]
+}

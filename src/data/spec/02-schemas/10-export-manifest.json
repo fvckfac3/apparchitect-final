@@ -1,0 +1,335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apparchitect.dev/schemas/10-export-manifest.schema.json",
+
+  "title": "AppArchitect Export Manifest Schema",
+
+  "description": "Canonical export contract defining how a full AppArchitect project is packaged, versioned, verified, and prepared for deployment or handoff.",
+
+  "type": "object",
+
+  "required": [
+    "metadata",
+    "references",
+    "content"
+  ],
+
+  "properties": {
+
+    "metadata": {
+      "$ref": "#/$defs/artifactMetadata"
+    },
+
+    "references": {
+      "$ref": "#/$defs/referenceModel"
+    },
+
+    "content": {
+      "$ref": "#/$defs/exportContent"
+    }
+  },
+
+  "$defs": {
+
+    "artifactMetadata": {
+      "type": "object",
+      "required": [
+        "id",
+        "artifact_type",
+        "name",
+        "version",
+        "status",
+        "owner",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+
+        "id": {
+          "type": "string",
+          "pattern": "^export_[a-zA-Z0-9_-]+$"
+        },
+
+        "artifact_type": {
+          "const": "export_manifest"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "version": {
+      "type": "object",
+      "required": ["major", "minor", "patch"],
+      "properties": {
+        "major": { "type": "integer" },
+        "minor": { "type": "integer" },
+        "patch": { "type": "integer" }
+      }
+    },
+
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "building",
+        "validated",
+        "exported",
+        "failed",
+        "archived"
+      ]
+    },
+
+    "owner": {
+      "type": "string",
+      "enum": [
+        "Build Agent",
+        "Export Agent",
+        "Governance Layer",
+        "Release Manager Agent"
+      ]
+    },
+
+    "referenceModel": {
+      "type": "object",
+      "properties": {
+
+        "source_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "dependent_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "validation_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "exportContent": {
+      "type": "object",
+
+      "required": [
+        "project_id",
+        "version",
+        "export_type",
+        "artifacts",
+        "build_metadata"
+      ],
+
+      "properties": {
+
+        "project_id": {
+          "type": "string"
+        },
+
+        "version": {
+          "type": "string"
+        },
+
+        "export_type": {
+          "type": "string",
+          "enum": [
+            "full_project",
+            "frontend_only",
+            "backend_only",
+            "api_bundle",
+            "documentation_only",
+            "ai_system_bundle",
+            "deployment_ready"
+          ]
+        },
+
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/exportArtifact"
+          }
+        },
+
+        "build_metadata": {
+          "$ref": "#/$defs/buildMetadata"
+        },
+
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dependency"
+          }
+        },
+
+        "deployment_targets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "web",
+              "mobile",
+              "server",
+              "edge",
+              "container",
+              "serverless"
+            ]
+          }
+        },
+
+        "integrity": {
+          "$ref": "#/$defs/integrity"
+        }
+      }
+    },
+
+    "exportArtifact": {
+      "type": "object",
+      "required": [
+        "artifact_id",
+        "type",
+        "path"
+      ],
+      "properties": {
+
+        "artifact_id": {
+          "type": "string"
+        },
+
+        "type": {
+          "type": "string",
+          "enum": [
+            "screen",
+            "feature",
+            "integration",
+            "ai_feature",
+            "workflow",
+            "schema",
+            "validation_result",
+            "document",
+            "config"
+          ]
+        },
+
+        "path": {
+          "type": "string"
+        },
+
+        "checksum": {
+          "type": "string"
+        }
+      }
+    },
+
+    "buildMetadata": {
+      "type": "object",
+      "required": [
+        "generated_by",
+        "build_timestamp"
+      ],
+      "properties": {
+
+        "generated_by": {
+          "type": "string"
+        },
+
+        "build_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "agent_count": {
+          "type": "integer"
+        },
+
+        "task_count": {
+          "type": "integer"
+        },
+
+        "validation_score_average": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+
+    "dependency": {
+      "type": "object",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "type": "string"
+        },
+
+        "type": {
+          "type": "string",
+          "enum": [
+            "npm",
+            "python",
+            "api",
+            "service",
+            "database"
+          ]
+        }
+      }
+    },
+
+    "integrity": {
+      "type": "object",
+      "properties": {
+
+        "verified": {
+          "type": "boolean"
+        },
+
+        "method": {
+          "type": "string",
+          "enum": [
+            "checksum",
+            "signature",
+            "hash_chain"
+          ]
+        },
+
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

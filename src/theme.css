@@ -1,0 +1,74 @@
+/**
+ * ⚠️ THEME CONFIGURATION — Tailwind v4
+ * AppArchitect Brand Identity System v1.0
+ */
+@theme {
+	/* Foundation Colors */
+	--color-ink: #080A10;
+	--color-deep: #0E1018;
+	--color-surface: #141720;
+	--color-panel: #1C2030;
+	--color-border: #252A3A;
+
+	/* Accent - Primary */
+	--color-cyan: #00E5CC;
+	--color-cyan-dim: #00B8A4;
+
+	/* Accent - Secondary */
+	--color-amber: #F59E0B;
+	--color-signal-red: #FF4C6A;
+
+	/* Text Scale */
+	--color-text-white: #F5F2EC;
+	--color-text-warm: #E8E4DA;
+	--color-text-light: #A8B0C8;
+	--color-text-slate: #6B7494;
+
+	/* Agent Colors */
+	--color-agent-orchestrator: #00E5CC;
+	--color-agent-backend: #3B82F6;
+	--color-agent-frontend: #8B5CF6;
+	--color-agent-database: #F59E0B;
+	--color-agent-auth: #EF4444;
+	--color-agent-payments: #10B981;
+	--color-agent-ai: #EC4899;
+	--color-agent-devops: #6366F1;
+	--color-agent-qa: #14B8A6;
+	--color-agent-realtime: #F97316;
+	--color-agent-analytics: #06B6D4;
+	--color-agent-mobile: #A855F7;
+
+	/* Semantic Colors */
+	--color-primary: #00E5CC;
+	--color-primary-foreground: #080A10;
+	--color-secondary: #1C2030;
+	--color-secondary-foreground: #F5F2EC;
+	--color-destructive: #FF4C6A;
+	--color-destructive-foreground: #F5F2EC;
+	--color-muted: #141720;
+	--color-muted-foreground: #6B7494;
+	--color-accent: #00E5CC;
+	--color-accent-foreground: #080A10;
+	--color-input: #252A3A;
+	--color-ring: #00E5CC;
+
+	/* Radius */
+	--radius-sm: 0.25rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--radius-xl: 1rem;
+
+	/* Fonts */
+	--font-display: 'Bebas Neue', Impact, sans-serif;
+	--font-mono: 'Courier New', Courier, monospace;
+	--font-sans: 'Inter', system-ui, sans-serif;
+}
+
+/* Custom font imports */
+@font-face {
+	font-family: 'Bebas Neue';
+	src: url('https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}

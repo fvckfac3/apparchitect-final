@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apparchitect.dev/schemas/08-ai-feature.schema.json",
+
+  "title": "AppArchitect AI Feature Schema",
+
+  "description": "Canonical AI feature contract defining model behavior, prompt architecture, tool access, memory systems, safety constraints, and execution modes for AI-driven features inside AppArchitect.",
+
+  "type": "object",
+
+  "required": [
+    "metadata",
+    "references",
+    "content"
+  ],
+
+  "properties": {
+
+    "metadata": {
+      "$ref": "#/$defs/artifactMetadata"
+    },
+
+    "references": {
+      "$ref": "#/$defs/referenceModel"
+    },
+
+    "content": {
+      "$ref": "#/$defs/aiFeatureContent"
+    }
+  },
+
+  "$defs": {
+
+    "artifactMetadata": {
+      "type": "object",
+      "required": [
+        "id",
+        "artifact_type",
+        "name",
+        "version",
+        "status",
+        "owner",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+
+        "id": {
+          "type": "string",
+          "pattern": "^ai_feature_[a-zA-Z0-9_-]+$"
+        },
+
+        "artifact_type": {
+          "const": "ai_feature"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "version": {
+      "type": "object",
+      "required": ["major", "minor", "patch"],
+      "properties": {
+        "major": { "type": "integer" },
+        "minor": { "type": "integer" },
+        "patch": { "type": "integer" }
+      }
+    },
+
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_progress",
+        "configured",
+        "validated",
+        "active",
+        "deprecated"
+      ]
+    },
+
+    "owner": {
+      "type": "string",
+      "enum": [
+        "AI Agent Layer",
+        "Prompt Engineer Agent",
+        "Backend Agent",
+        "Governance Layer"
+      ]
+    },
+
+    "referenceModel": {
+      "type": "object",
+      "properties": {
+
+        "source_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "dependent_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "validation_artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "aiFeatureContent": {
+      "type": "object",
+
+      "required": [
+        "feature_id",
+        "name",
+        "ai_mode",
+        "model",
+        "prompt",
+        "tools",
+        "memory",
+        "output"
+      ],
+
+      "properties": {
+
+        "feature_id": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "description": {
+          "type": "string"
+        },
+
+        "ai_mode": {
+          "type": "string",
+          "enum": [
+            "assistive",
+            "autonomous",
+            "hybrid",
+            "reactive",
+            "batch"
+          ]
+        },
+
+        "model": {
+          "$ref": "#/$defs/modelConfig"
+        },
+
+        "prompt": {
+          "$ref": "#/$defs/promptConfig"
+        },
+
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tool"
+          }
+        },
+
+        "memory": {
+          "$ref": "#/$defs/memoryConfig"
+        },
+
+        "output": {
+          "$ref": "#/$defs/outputConfig"
+        },
+
+        "safety": {
+          "$ref": "#/$defs/safetyConfig"
+        }
+      }
+    },
+
+    "modelConfig": {
+      "type": "object",
+      "required": ["provider", "model"],
+      "properties": {
+
+        "provider": {
+          "type": "string",
+          "enum": [
+            "openai",
+            "anthropic",
+            "google",
+            "azure",
+            "local",
+            "custom"
+          ]
+        },
+
+        "model": {
+          "type": "string"
+        },
+
+        "temperature": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+
+        "max_tokens": {
+          "type": "integer"
+        },
+
+        "top_p": {
+          "type": "number"
+        }
+      }
+    },
+
+    "promptConfig": {
+      "type": "object",
+      "required": ["system_prompt"],
+      "properties": {
+
+        "system_prompt": {
+          "type": "string"
+        },
+
+        "developer_prompt": {
+          "type": "string"
+        },
+
+        "user_template": {
+          "type": "string"
+        },
+
+        "context_strategy": {
+          "type": "string",
+          "enum": [
+            "full_context",
+            "summarized",
+            "retrieval_augmented",
+            "minimal"
+          ]
+        }
+      }
+    },
+
+    "tool": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+
+        "name": {
+          "type": "string"
+        },
+
+        "type": {
+          "type": "string",
+          "enum": [
+            "api_call",
+            "database_query",
+            "function",
+            "webhook",
+            "internal_service"
+          ]
+        },
+
+        "permission": {
+          "type": "string",
+          "enum": [
+            "read",
+            "write",
+            "admin"
+          ]
+        }
+      }
+    },
+
+    "memoryConfig": {
+      "type": "object",
+      "properties": {
+
+        "enabled": {
+          "type": "boolean"
+        },
+
+        "scope": {
+          "type": "string",
+          "enum": [
+            "session",
+            "user",
+            "project",
+            "global"
+          ]
+        },
+
+        "retention_days": {
+          "type": "integer"
+        }
+      }
+    },
+
+    "outputConfig": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+
+        "type": {
+          "type": "string",
+          "enum": [
+            "json",
+            "markdown",
+            "text",
+            "structured",
+            "api_response"
+          ]
+        },
+
+        "schema_ref": {
+          "type": "string"
+        }
+      }
+    },
+
+    "safetyConfig": {
+      "type": "object",
+      "properties": {
+
+        "moderation_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+
+        "blocked_topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
