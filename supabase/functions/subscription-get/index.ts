@@ -53,26 +53,36 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Quota usage for current month
-  const { data: usageRows, error: usageErr } = await supabaseAdmin
+  // Quota usage for current month — one row per (user_id, period_start).
+  const { data: usageRow, error: usageErr } = await supabaseAdmin
     .from('quota_usage')
-    .select('package, units_consumed')
+    .select('standard_units_used, ultimate_units_used, standard_equivalent_used, period_start, period_end')
     .eq('user_id', user.id)
-    .gte('created_at', startOfMonthIso());
+    .eq('period_start', startOfMonthIso())
+    .maybeSingle();
 
   if (usageErr) {
     console.error('quota_usage fetch error:', usageErr);
   }
 
-  const unitsUsed = (usageRows ?? []).reduce((acc, r) => acc + r.units_consumed, 0);
-  const ultimateUsed = (usageRows ?? []).filter((r) => r.package === 'ultimate').length;
+  const unitsUsed = usageRow?.standard_equivalent_used ?? 0;
+  const ultimateUsed = usageRow?.ultimate_units_used ?? 0;
+  const standardUsed = usageRow?.standard_units_used ?? 0;
 
   const tier = sub?.tier ?? 'free';
 
   return new Response(
     JSON.stringify({
       subscription: sub ?? null,
-      quotaUsage: tier === 'free' ? null : { unitsUsed, ultimateUsed, unitsRemaining: tier === 'pro' ? Math.max(0, 10 - unitsUsed) : null, ultimateRemaining: tier === 'team' ? Math.max(0, 10 - ultimateUsed) : null },
+      quotaUsage: tier === 'free'
+        ? null
+        : {
+            unitsUsed,
+            ultimateUsed,
+            standardUsed,
+            unitsRemaining: tier === 'pro' ? Math.max(0, 10 - unitsUsed) : null,
+            ultimateRemaining: tier === 'team' ? Math.max(0, 10 - ultimateUsed) : null,
+          },
       tier,
     }),
     { status: 200, headers: { 'Content-Type': 'application/json' } },
