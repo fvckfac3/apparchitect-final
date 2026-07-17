@@ -12,7 +12,7 @@ import { startCheckout, openPortal } from '@/lib/billing/stripe-client';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import type { SubscriptionTier } from '@/lib/billing/types';
+import type { SubscriptionTier } from '@/lib/billing/tiers';
 
 const TIER_LABEL: Record<SubscriptionTier, string> = {
   free: 'Free',
@@ -38,7 +38,7 @@ const STATUS_BADGE: Record<string, { label: string; color: string }> = {
 
 export default function Billing() {
   const { user } = useAuth();
-  const { subscription, quotaUsage, loading, refetch } = useSubscription();
+  const { subscription, quota: quotaUsage, loading, refresh: refetch } = useSubscription();
   const [interval, setInterval] = useState<'month' | 'year'>('month');
   const [working, setWorking] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<'downgrade' | 'cancel' | null>(null);
@@ -69,7 +69,7 @@ export default function Billing() {
     if (!user) return;
     setWorking('portal');
     try {
-      const { url } = await openPortal({ returnUrl: window.location.href });
+      const { url } = await openPortal(window.location.href);
       window.location.href = url;
     } catch (err) {
       alert('Could not open billing portal: ' + (err as Error).message);
@@ -137,18 +137,18 @@ export default function Billing() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-muted-foreground">Units used</div>
-                <div className="text-2xl font-semibold mt-1">{quotaUsage.unitsUsed}</div>
+                <div className="text-2xl font-semibold mt-1">{(quotaUsage?.standard_equivalent_used ?? 0)}</div>
               </div>
               {tier === 'pro' && (
                 <div>
                   <div className="text-muted-foreground">Units remaining</div>
-                  <div className="text-2xl font-semibold mt-1">{Math.max(0, 10 - quotaUsage.unitsUsed)} / 10</div>
+                  <div className="text-2xl font-semibold mt-1">{Math.max(0, 10 - (quotaUsage?.standard_equivalent_used ?? 0))} / 10</div>
                 </div>
               )}
               {tier === 'team' && (
                 <div>
                   <div className="text-muted-foreground">Ultimate used</div>
-                  <div className="text-2xl font-semibold mt-1">{quotaUsage.ultimateUsed} / 10</div>
+                  <div className="text-2xl font-semibold mt-1">{(quotaUsage?.ultimate_units_used ?? 0)} / 10</div>
                 </div>
               )}
             </div>

@@ -476,7 +476,7 @@ export function getPlaceholderCount(content: string): number {
 }
 
 export function findAllPlaceholders(content: string): string[] {
-	const pattern = /\[[A-Z][a-zA-Z0-9\s/\\-&]+\]/g;
+	const pattern = /\[[A-Z][a-zA-Z0-9\s/\\&-]+\]/g;
 	return Array.from(new Set(content.match(pattern) || []));
 }
 

@@ -16,7 +16,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { SubscriptionState, QuotaUsage, ProjectCount } from '@/lib/billing/types';
+import type { SubscriptionState, QuotaUsage, QuotaUsageRow } from '@/lib/billing/types';
 import { fetchSubscription } from '@/lib/billing/stripe-client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,9 +24,11 @@ interface UseSubscriptionResult {
   loading: boolean;
   authenticated: boolean;
   subscription: SubscriptionState | null;
-  quota: QuotaUsage | null;
+  quota: QuotaUsageRow | null;
+  quotaUsage: QuotaUsage | null;
   projectCount: number;
   refresh: () => Promise<void>;
+  refetch: () => Promise<void>;
 }
 
 const EMPTY: SubscriptionState = {
@@ -45,7 +47,7 @@ export function useSubscription(): UseSubscriptionResult {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionState | null>(null);
-  const [quota, setQuota] = useState<QuotaUsage | null>(null);
+  const [quota, setQuota] = useState<QuotaUsageRow | null>(null);
   const [projectCount, setProjectCount] = useState(0);
 
   const load = useCallback(async () => {
@@ -76,7 +78,7 @@ export function useSubscription(): UseSubscriptionResult {
         .from('quota_usage')
         .select('*')
         .eq('user_id', user.id)
-        .eq('period_yyyymm', new Date().toISOString().slice(0, 7).replace('-', ''))
+        .eq('period_start', new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString())
         .maybeSingle(),
       supabase
         .from('projects')
@@ -104,7 +106,13 @@ export function useSubscription(): UseSubscriptionResult {
       setSubscription(EMPTY);
     }
 
-    setQuota(quotaRow ?? null);
+    setQuota(quotaRow ? {
+      unitsUsed: quotaRow.standard_equivalent_used ?? 0,
+      ultimateUsed: quotaRow.ultimate_units_used ?? 0,
+      standardUsed: quotaRow.standard_units_used ?? 0,
+      unitsRemaining: null,
+      ultimateRemaining: null,
+    } : null);
     setProjectCount(projCount ?? 0);
     setLoading(false);
   }, []);
@@ -118,5 +126,5 @@ export function useSubscription(): UseSubscriptionResult {
     return () => sub.subscription.unsubscribe();
   }, [load]);
 
-  return { loading, authenticated, subscription, quota, projectCount, refresh: load };
+  return { loading, authenticated, subscription, quota, quotaUsage: quota, projectCount, refresh: load, refetch: load };
 }

@@ -13,12 +13,12 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { TIER_LIMITS, type Package, type SubscriptionTier, FEATURE_GATES, type ErrorCode } from './tiers';
+import { TIER_LIMITS, type PackageType, type SubscriptionTier, FEATURE_GATES, type ErrorCode } from './tiers';
 import type { GateResult } from './types';
 
 export type PackageCost = 1 | 3;  // Standard=1, Ultimate=3
 
-export const PACKAGE_COST: Record<Package, PackageCost> = {
+export const PACKAGE_COST: Record<PackageType, PackageCost> = {
   standard: 1,
   ultimate: 3,
 };
@@ -61,14 +61,14 @@ export function emptyQuotaSnapshot(tier: SubscriptionTier): QuotaSnapshot {
     periodStart,
     periodEnd,
     unitsUsed: 0,
-    unitsAllowed: limits.maxUnitsPerMonth,
+    unitsAllowed: limits.unitsPerMonth,
     ultimateUsed: 0,
-    ultimateAllowed: limits.maxUltimatePerMonth,
+    ultimateAllowed: tier === 'free' ? 0 : tier === 'team' ? 10 : Infinity,
     standardUsed: 0,
-    standardAllowed: limits.maxStandardPerMonth,
-    remainingUnits: limits.maxUnitsPerMonth,
-    remainingUltimate: limits.maxUltimatePerMonth,
-    remainingStandard: limits.maxStandardPerMonth,
+    standardAllowed: tier === 'free' ? 1 : Infinity,
+    remainingUnits: limits.unitsPerMonth,
+    remainingUltimate: tier === 'free' ? 0 : tier === 'team' ? 10 : Infinity,
+    remainingStandard: tier === 'free' ? 1 : Infinity,
   };
 }
 
@@ -91,23 +91,23 @@ export async function getCurrentUsage(userId: string): Promise<QuotaSnapshot | n
 
   if (!data) return emptyQuotaSnapshot('free');
 
-  const tier = (data.tier as SubscriptionTier) || 'free';
+  const tier = 'free' as SubscriptionTier;
   return buildSnapshot(tier, data);
 }
 
 function buildSnapshot(
   tier: SubscriptionTier,
-  data: { units_used: number; ultimate_used: number; standard_used: number }
+  data: { standard_equivalent_used: number; ultimate_units_used: number; standard_units_used: number }
 ): QuotaSnapshot {
   const limits = TIER_LIMITS[tier];
   const { periodStart, periodEnd } = getCurrentPeriod();
   const inf = Infinity;
-  const unitsUsed = data.units_used ?? 0;
-  const ultimateUsed = data.ultimate_used ?? 0;
-  const standardUsed = data.standard_used ?? 0;
-  const unitsAllowed = limits.maxUnitsPerMonth;
-  const ultimateAllowed = limits.maxUltimatePerMonth;
-  const standardAllowed = limits.maxStandardPerMonth;
+  const unitsUsed = data.standard_equivalent_used ?? 0;
+  const ultimateUsed = data.ultimate_units_used ?? 0;
+  const standardUsed = data.standard_units_used ?? 0;
+  const unitsAllowed = limits.unitsPerMonth;
+  const ultimateAllowed = limits.tier === 'free' ? 0 : tier === 'team' ? 10 : Infinity;
+  const standardAllowed = limits.tier === 'free' ? 1 : Infinity;
   return {
     tier,
     periodStart,
@@ -127,7 +127,7 @@ function buildSnapshot(
 /** Atomically increments usage if there's room. Returns false if quota exceeded. */
 export async function consumeQuota(
   userId: string,
-  pkg: Package,
+  pkg: PackageType,
 ): Promise<{ ok: boolean; errorCode: ErrorCode | null; snapshot: QuotaSnapshot | null }> {
   if (!supabase) {
     return { ok: false, errorCode: 'BIZ_FEATURE_TEAM_ONLY' as ErrorCode, snapshot: null };
@@ -161,10 +161,11 @@ export async function consumeQuota(
     {
       user_id: userId,
       period_start: periodStart,
-      tier: snapshot.tier,
-      units_used: snapshot.unitsUsed + cost,
-      ultimate_used: snapshot.ultimateUsed + (pkg === 'ultimate' ? 1 : 0),
-      standard_used: snapshot.standardUsed + (pkg === 'standard' ? 1 : 0),
+      period_end: getCurrentPeriod().periodEnd,
+      standard_units_used: snapshot.standardUsed + (pkg === 'standard' ? 1 : 0),
+      ultimate_units_used: snapshot.ultimateUsed + (pkg === 'ultimate' ? 1 : 0),
+      standard_equivalent_used: snapshot.unitsUsed + cost,
+      last_generation_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
     { onConflict: 'user_id,period_start' }

@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          tier: string
+          status: string
+          interval: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          stripe_price_id: string | null
+          trial_ends_at: string | null
+          current_period_start: string | null
+          current_period_end: string | null
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          grace_period_ends_at: string | null
+          package: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: { [key: string]: Json | undefined }
+        Update: { [key: string]: Json | undefined }
+        Relationships: []
+      }
+      quota_usage: {
+        Row: {
+          id: string
+          user_id: string
+          period_start: string
+          period_end: string
+          standard_units_used: number
+          ultimate_units_used: number
+          standard_equivalent_used: number
+          last_generation_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: { [key: string]: Json | undefined }
+        Update: { [key: string]: Json | undefined }
+        Relationships: []
+      }
       document_versions: {
         Row: {
           created_at: string

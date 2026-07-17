@@ -25,6 +25,16 @@ export type SubscriptionStatus =
   | null;
 export type BillingInterval = 'month' | 'year';
 export type PackageType = 'standard' | 'ultimate';
+export type Package = PackageType;
+export type PaywallTrigger =
+  | 'project_limit'
+  | 'custom_agent'
+  | 'team_feature'
+  | 'github_export'
+  | 'format_export'
+  | 'version_history'
+  | 'regen_limit'
+  | 'sso';
 
 // ----------------------------------------------------------------------------
 // §3.2 Tier Definitions
@@ -114,6 +124,9 @@ export function packageAvailableOn(
 
 export interface TierLimits {
   maxProjects: number;
+  maxUnitsPerMonth: number;
+  maxUltimatePerMonth: number;
+  maxStandardPerMonth: number;
   maxRegenerationsPerDocument: number;
   auditLogRetentionDays: number;
   generationRateLimitPerDay: number;
@@ -128,6 +141,9 @@ export interface TierLimits {
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   free: {
     maxProjects: 1,
+    maxUnitsPerMonth: 1,
+    maxUltimatePerMonth: 0,
+    maxStandardPerMonth: 1,
     maxRegenerationsPerDocument: 3,
     auditLogRetentionDays: 30,
     generationRateLimitPerDay: 1,
@@ -140,6 +156,9 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   },
   pro: {
     maxProjects: 10,
+    maxUnitsPerMonth: 10,
+    maxUltimatePerMonth: 10,
+    maxStandardPerMonth: 10,
     maxRegenerationsPerDocument: Number.POSITIVE_INFINITY,
     auditLogRetentionDays: 90,
     generationRateLimitPerDay: 50,
@@ -152,6 +171,9 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   },
   team: {
     maxProjects: Number.POSITIVE_INFINITY,
+    maxUnitsPerMonth: Number.POSITIVE_INFINITY,
+    maxUltimatePerMonth: 10,
+    maxStandardPerMonth: Number.POSITIVE_INFINITY,
     maxRegenerationsPerDocument: Number.POSITIVE_INFINITY,
     auditLogRetentionDays: 365,
     generationRateLimitPerDay: 500,

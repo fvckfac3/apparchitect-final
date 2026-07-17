@@ -77,10 +77,10 @@ const TRIGGER_CONTENT: Record<PaywallTrigger, PaywallContent> = {
   },
 };
 
-interface PaywallModalProps {
-  open: boolean;
+export interface PaywallModalProps {
+  open?: boolean;
   onClose: () => void;
-  trigger: PaywallTrigger;
+  trigger: PaywallTrigger | null;
   defaultInterval?: 'month' | 'year';
   projectCount?: number;
 }
@@ -97,7 +97,7 @@ export function PaywallModal({
   const [loadingTier, setLoadingTier] = useState<'pro' | 'team' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (!open) return null;
+  if (!trigger || open === false) return null;
   const content = TRIGGER_CONTENT[trigger];
   const isTeamTrigger = trigger === 'team_feature' || trigger === 'sso';
 

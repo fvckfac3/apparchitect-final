@@ -10,7 +10,7 @@
  */
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import { PaywallModal } from './PaywallModal';
-import type { PaywallTrigger } from '@/lib/billing/tiers';
+import type { PaywallTrigger } from './PaywallModal';
 import type { BillingErrorCode } from '@/lib/billing/errors';
 
 interface PaywallState {
@@ -39,11 +39,13 @@ export function PaywallProvider({ children }: { children: ReactNode }) {
   return (
     <PaywallContext.Provider value={{ show, close }}>
       {children}
-      <PaywallModal
-        trigger={state.trigger}
-        errorCode={state.errorCode}
-        onClose={close}
-      />
+      {state.trigger && (
+        <PaywallModal
+          open
+          trigger={state.trigger}
+          onClose={close}
+        />
+      )}
     </PaywallContext.Provider>
   );
 }

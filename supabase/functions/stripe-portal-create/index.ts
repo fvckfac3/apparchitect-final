@@ -13,11 +13,13 @@ const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-12-18.acacia' });
 
-const supabaseUser = createClient(
-  SUPABASE_URL,
-  Deno.env.get('SUPABASE_ANON_KEY')!,
-  { global: { headers: { Authorization: req => req.headers.get('Authorization') ?? '' } } },
-);
+function createUserClient(auth: string) {
+  return createClient(
+    SUPABASE_URL,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+    { global: { headers: { Authorization: auth } } },
+  );
+}
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
@@ -32,6 +34,7 @@ Deno.serve(async (req) => {
     });
   }
 
+  const supabaseUser = createUserClient(auth);
   const { data: { user }, error: userErr } = await supabaseUser.auth.getUser();
   if (userErr || !user) {
     return new Response(JSON.stringify({ error: 'STRIPE_PORTAL_LINK_FAILED', detail: 'invalid auth' }), {

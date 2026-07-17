@@ -4,7 +4,33 @@
  * migration is authoritative.
  */
 
-import type { SubscriptionTier, SubscriptionStatus, BillingInterval, ErrorCode } from './tiers';
+import type { SubscriptionTier, SubscriptionStatus, BillingInterval, ErrorCode, PackageType } from './tiers';
+
+export type { SubscriptionTier, SubscriptionStatus, BillingInterval, ErrorCode, PackageType };
+
+export interface SubscriptionState {
+  tier: SubscriptionTier;
+  status: SubscriptionStatus;
+  interval: BillingInterval | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  trialEndsAt: string | null;
+  gracePeriodEndsAt: string | null;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+}
+
+export interface QuotaUsage {
+  unitsUsed: number;
+  ultimateUsed: number;
+  standardUsed: number;
+  unitsRemaining: number | null;
+  ultimateRemaining: number | null;
+}
+
+export interface ProjectCount {
+  count: number;
+}
 
 export interface SubscriptionRow {
   id: string;

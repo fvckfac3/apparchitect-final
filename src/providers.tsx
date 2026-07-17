@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PaywallProvider } from '@/components/Billing/PaywallProvider';
-import { PaywallModal } from '@/components/Billing/PaywallModal';
 
 /**
  * ⚠️ App-wide providers. Add new providers here — they'll be available in all routes.
@@ -18,7 +17,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
 		<AuthProvider>
 			<PaywallProvider>
 				{children}
-				<PaywallModal />
 			</PaywallProvider>
 		</AuthProvider>
 	);

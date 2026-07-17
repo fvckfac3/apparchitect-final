@@ -122,7 +122,8 @@ async function testFallback(): Promise<ChatResponse> {
 async function main() {
   header('AI PROVIDER SMOKE TEST');
   console.log(`Time: ${new Date().toISOString()}`);
-  console.log(`Node: ${process.version}  Bun: ${(process as any).versions?.bun || 'n/a'}`);
+  const runtimeVersions = process.versions as NodeJS.ProcessVersions;
+  console.log(`Node: ${process.version}  Bun: ${runtimeVersions.bun || 'n/a'}`);
 
   header('Environment snapshot');
   const snap = envSnapshot();

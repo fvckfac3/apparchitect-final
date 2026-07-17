@@ -38,10 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		}
 
 		// Get initial session
-		supabase.auth.getUser().then(({ data: { user } }) => {
-			setUser(user);
-			setIsLoading(false);
-		});
+		void supabase.auth.getSession()
+			.then(({ data: { session } }) => {
+				setSession(session);
+				setUser(session?.user ?? null);
+			})
+			.catch(() => {
+				setSession(null);
+				setUser(null);
+			})
+			.finally(() => setIsLoading(false));
 
 		// Listen for auth changes
 		const {

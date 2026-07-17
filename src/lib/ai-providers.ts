@@ -87,7 +87,7 @@ export const PROVIDER_CONFIG: Record<AIProvider, ProviderConfig> = {
 };
 
 const safeEnv: Record<string, string | undefined> =
-  (typeof import.meta !== 'undefined' && (import.meta as any).env) || {};
+  typeof import.meta !== 'undefined' ? import.meta.env : {};
 
 export const PRIMARY_PROVIDER: AIProvider =
   (safeEnv.VITE_AI_PRIMARY as AIProvider) || 'anthropic';

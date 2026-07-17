@@ -12,7 +12,7 @@ import { StepTracker } from '@/components/Timeline/StepTracker';
 import { AuthPage } from '@/components/Auth/AuthPage';
 import { useAgentTeam } from '@/hooks/use-agent-team';
 import { useDocumentGenerator } from '@/hooks/use-document-generator';
-import { usePRDGenerator } from '@/hooks/use-prd-generator';
+import { usePRDGeneratorV2 } from '@/hooks/use-prd-generator-v2';
 import { useDbProjects } from '@/hooks/use-db-projects';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/use-subscription';
@@ -21,7 +21,6 @@ import { Button } from '@/components/ui/Button';
 import { ArrowRight, RotateCcw, RefreshCw, Loader2 } from 'lucide-react';
 import type { AppPhase, InterviewAnswers } from '@/types';
 import type { DocumentVersion } from '@/types/project';
-import { TIER_LIMITS } from '@/constants';
 
 export default function Index() {
   const { user, isLoading: authLoading } = useAuth();
@@ -31,7 +30,7 @@ export default function Index() {
 
   const { team, isDesigning, designTeam } = useAgentTeam();
   const { documents, isGenerating, generateDocuments } = useDocumentGenerator();
-  const { progress: prdProgress, generateSuite, suite: prdSuite, synthesizeTeam, aiStatus } = usePRDGenerator();
+  const { progress: prdProgress, generateSuite, suite: prdSuite, synthesizeTeam, aiStatus } = usePRDGeneratorV2();
   const {
     currentProject,
     documentVersions,
@@ -46,7 +45,7 @@ export default function Index() {
     getCurrentVersion,
     getProjectSummaries
   } = useDbProjects();
-  const { subscription, quotaUsage } = useSubscription();
+  const { subscription, projectCount } = useSubscription();
   const { show: showPaywall } = usePaywall();
 
   // Track completed phases for step tracker
@@ -114,7 +113,6 @@ export default function Index() {
     // Generate full PRD suite with the new generator
     try {
       const result = await generateSuite(interviewAnswers);
-      // Also run the legacy generator for backwards compatibility
       generateDocuments(interviewAnswers, result.team);
     } catch (err) {
       console.error('PRD generation failed:', err);
@@ -153,7 +151,7 @@ export default function Index() {
   const handleCreateProject = useCallback(
     async (name: string) => {
       // PRD §4 paywall trigger: free user creating a 2nd project
-      if (subscription?.tier === 'free' && projects.length >= 1) {
+      if (subscription?.tier === 'free' && getProjectSummaries().length >= 1) {
         showPaywall('project_limit', 'BIZ_PROJECT_LIMIT_REACHED');
         return;
       }
@@ -165,7 +163,7 @@ export default function Index() {
         setInterviewAnswers(null);
       }
     },
-    [createProject, showPaywall, projects, subscription]
+    [createProject, getProjectSummaries, showPaywall, subscription]
   );
 
   const handleOpenProject = useCallback(
@@ -326,7 +324,7 @@ export default function Index() {
         }
         rightPanel={<>
             {isGenerating && aiStatus && (
-              <AIStatusBadge status={aiStatus} className="mb-3" />
+              <AIStatusBadge state={aiStatus} phase={prdProgress.phase} />
             )}
             <AgentMapPanel team={currentProject?.agentTeam || team} isDesigning={isDesigning} />
           </>} />

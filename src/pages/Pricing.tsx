@@ -190,10 +190,6 @@ export default function Pricing(): ReactNode {
         successUrl: window.location.origin + '/settings/billing?upgraded=1',
         cancelUrl: window.location.origin + '/pricing',
       });
-      if (!result.ok) {
-        setError(BILLING_ERROR_REGISTRY[result.errorCode]?.userMessage ?? BILLING_ERROR_REGISTRY.STRIPE_CHECKOUT_FAILED);
-        return;
-      }
       window.location.href = result.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Checkout failed');
@@ -204,11 +200,11 @@ export default function Pricing(): ReactNode {
 
   const currentTier = subscription?.tier ?? 'free';
   const proPrice = interval === 'year'
-    ? `$${TIER_CONFIG.pro.yearlyPrice}`
-    : `$${TIER_CONFIG.pro.monthlyPrice}`;
+    ? `$${TIER_CONFIG.pro.yearlyPriceCents / 100}`
+    : `$${TIER_CONFIG.pro.monthlyPriceCents / 100}`;
   const teamPrice = interval === 'year'
-    ? `$${TIER_CONFIG.team.yearlyPrice}`
-    : `$${TIER_CONFIG.team.monthlyPrice}`;
+    ? `$${TIER_CONFIG.team.yearlyPriceCents / 100}`
+    : `$${TIER_CONFIG.team.monthlyPriceCents / 100}`;
   const proPerMonth = interval === 'year' ? '$39' : '$49';
   const teamPerMonth = interval === 'year' ? '$119' : '$149';
 

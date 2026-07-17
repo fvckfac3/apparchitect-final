@@ -18,9 +18,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { getErrorCode, BillingError } from './errors';
 import type { SubscriptionTier } from './types';
 
-const FN_CHECKOUT = 'stripe-checkout';
-const FN_PORTAL = 'stripe-portal';
-const FN_SUBSCRIPTION = 'stripe-subscription';
+const FN_CHECKOUT = 'stripe-checkout-create';
+const FN_PORTAL = 'stripe-portal-create';
+const FN_SUBSCRIPTION = 'subscription-get';
 
 export interface CheckoutInput {
   targetTier: Exclude<SubscriptionTier, 'free'>;
@@ -97,11 +97,12 @@ export async function fetchSubscription(): Promise<SubscriptionState | null> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) return null;
   try {
-    return await callEdge<Record<string, never>, SubscriptionState>(
+    const response = await callEdge<Record<string, never>, { subscription: SubscriptionState | null }>(
       FN_SUBSCRIPTION,
       {},
       session.access_token,
     );
+    return response.subscription;
   } catch (err) {
     if (err instanceof BillingError && err.code === 'STRIPE_SUBSCRIPTION_NOT_FOUND') {
       return null;
