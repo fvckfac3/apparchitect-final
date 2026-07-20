@@ -28,7 +28,7 @@ export function AuthPage() {
         if (error) {
           setError(error.message);
         } else {
-          setSuccess('Account created! You can now sign in.');
+          setSuccess('Account created. Check your email to confirm your address, then sign in.');
           setMode('signin');
         }
       } else {

@@ -62,28 +62,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
-		if (!supabase) return { error: new Error('Database not available') };
+		if (!supabase) return { error: new Error('Authentication is temporarily unavailable. Please try again shortly.') };
 
-		const { error } = await supabase.auth.signUp({
-			email,
-			password,
-			options: {
-				data: { full_name: fullName },
-			},
-		});
+		try {
+			const { data, error } = await supabase.auth.signUp({
+				email: email.trim().toLowerCase(),
+				password,
+				options: {
+					data: { full_name: fullName?.trim() || null },
+					emailRedirectTo: `${window.location.origin}/`,
+				},
+			});
 
-		return { error: error as Error | null };
+			if (error) return { error: error as Error };
+			if (!data.user) return { error: new Error('We could not create the account. Please try again.') };
+			return { error: null };
+		} catch {
+			return { error: new Error('We could not reach the account service. Check your connection and try again.') };
+		}
 	}, []);
 
 	const signIn = useCallback(async (email: string, password: string) => {
-		if (!supabase) return { error: new Error('Database not available') };
+		if (!supabase) return { error: new Error('Authentication is temporarily unavailable. Please try again shortly.') };
 
-		const { error } = await supabase.auth.signInWithPassword({
-			email,
-			password,
-		});
-
-		return { error: error as Error | null };
+		try {
+			const { error } = await supabase.auth.signInWithPassword({
+				email: email.trim().toLowerCase(),
+				password,
+			});
+			return { error: error as Error | null };
+		} catch {
+			return { error: new Error('We could not reach the account service. Check your connection and try again.') };
+		}
 	}, []);
 
 	const signOut = useCallback(async () => {
