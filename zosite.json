@@ -1,0 +1,14 @@
+{
+  "name": "apparchitect-final",
+  "local_port": 5173,
+  "entrypoint": "bun run dev",
+  "publish": {
+    "label": "apparchitect-final",
+    "type": "http",
+    "entrypoint": "bun run prod",
+    "published_port": 5174,
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }
+}

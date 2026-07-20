@@ -36,8 +36,7 @@ export type GenerationPhase =
 	| 'filling_templates'
 	| 'validating'
 	| 'complete'
-	| 'failed'
-	| 'enhancing_with_ai';
+	| 'failed';
 
 export interface GenerationProgress {
 	phase: GenerationPhase;
@@ -73,7 +72,7 @@ export interface PRDSuiteOutputV2 {
 
 function convertToLegacyFormat(suite: PRDSuiteOutputV2, team: AgentTeam): GeneratedDocuments {
 	// Extract master context from base documents
-	const masterContent = suite.baseDocuments.get('03-core-systems') || '';
+	const masterContent = suite.baseDocuments.get('core-systems-template') || '';
 	
 	const masterContext: Document = {
 		id: 'master-context',
@@ -523,7 +522,7 @@ export function usePRDGeneratorV2() {
 	const [aiStatus, setAiStatus] = useState<import('@/components/Generation/AIStatusBadge').AIStatusState>({ kind: 'idle' });
 
 	// Main generation function
-	const generateSuite = useCallback(async (answers: InterviewAnswers): Promise<{ suite: PRDSuiteOutputV2; team: AgentTeam }> => {
+	const generateSuite = useCallback(async (answers: InterviewAnswers): Promise<{ suite: PRDSuiteOutputV2; team: AgentTeam; documents: GeneratedDocuments }> => {
 		const startTime = Date.now();
 		setIsGenerating(true);
 		setError(null);
@@ -605,7 +604,7 @@ export function usePRDGeneratorV2() {
 				percentage: 45,
 			}));
 
-			setAiStatus({ kind: 'connecting' });
+			setAiStatus({ kind: 'active', provider: 'AI', model: 'selecting' });
 
 			const enhancementQueue = v2Docs
 				.filter(doc => baseDocuments.has(doc.id))
@@ -631,7 +630,7 @@ export function usePRDGeneratorV2() {
 							}));
 						},
 						onProviderUsed: (provider, model, fellBack) => {
-							setAiStatus({ kind: 'generating', provider, model, fellBack });
+							setAiStatus(fellBack ? { kind: 'fallback', from: 'primary provider', to: provider, reason: 'automatic provider fallback' } : { kind: 'active', provider, model });
 						},
 					}
 				);
@@ -643,10 +642,15 @@ export function usePRDGeneratorV2() {
 						aiEnhanced++;
 					}
 				}
-				setAiStatus({ kind: 'complete', providers: Array.from(enhancementResults.values()).filter(r => r.enhanced).map(r => ({ provider: r.provider!, model: r.model! })) });
+				const providers = Array.from(enhancementResults.values())
+				.filter((result) => result.enhanced && result.provider && result.model)
+				.map((result) => ({ provider: result.provider!, model: result.model! }));
+			setAiStatus(providers.length > 0
+				? { kind: 'active', provider: providers[providers.length - 1].provider, model: 'complete' }
+				: { kind: 'unavailable', reason: 'No configured AI provider completed an enhancement' });
 			} catch (aiError) {
 				console.warn('AI enhancement failed, falling back to template-filled content:', aiError);
-				setAiStatus({ kind: 'error', error: aiError instanceof Error ? aiError.message : 'AI enhancement unavailable' });
+				setAiStatus({ kind: 'unavailable', reason: aiError instanceof Error ? aiError.message : 'AI enhancement unavailable' });
 			}
 
 			// Phase 4: Generate agent PRDs
@@ -731,7 +735,7 @@ export function usePRDGeneratorV2() {
 				auxiliaryDocuments: {
 					collaborationMap,
 					userGuide,
-					masterIndex: baseDocuments.get('14-master-index') || '',
+					masterIndex: baseDocuments.get('master-index-template') || '',
 				},
 				meta: {
 					projectName: answers.productName || 'PRD Suite',
@@ -756,7 +760,7 @@ export function usePRDGeneratorV2() {
 				statusMessage: `Generated ${allDocs.size} documents, validation score: ${validation.overallScore}/100`,
 			});
 			
-			return { suite: finalSuite, team };
+			return { suite: finalSuite, team, documents: convertToLegacyFormat(finalSuite, team) };
 			
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Generation failed';

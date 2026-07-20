@@ -25,7 +25,7 @@ interface UseSubscriptionResult {
   authenticated: boolean;
   subscription: SubscriptionState | null;
   quota: QuotaUsageRow | null;
-  quotaUsage: QuotaUsage | null;
+  quotaUsage: QuotaUsageRow | null;
   projectCount: number;
   refresh: () => Promise<void>;
   refetch: () => Promise<void>;
@@ -55,7 +55,12 @@ export function useSubscription(): UseSubscriptionResult {
       setLoading(false);
       return;
     }
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      console.error('[subscription] auth lookup failed:', userError.message);
+      setLoading(false);
+      return;
+    }
     if (!user) {
       setAuthenticated(false);
       setSubscription(EMPTY);
@@ -68,7 +73,7 @@ export function useSubscription(): UseSubscriptionResult {
 
     const subPromise = fetchSubscription().catch(() => null);
 
-    const [{ data: subRow }, { data: quotaRow }, { count: projCount }] = await Promise.all([
+    const [{ data: subRow, error: subError }, { data: quotaRow, error: quotaError }, { count: projCount, error: projectError }] = await Promise.all([
       supabase
         .from('subscriptions')
         .select('tier, status, interval, current_period_end, cancel_at_period_end, trial_ends_at, grace_period_ends_at, stripe_customer_id, stripe_subscription_id')
@@ -85,6 +90,10 @@ export function useSubscription(): UseSubscriptionResult {
         .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id),
     ]);
+
+    if (subError) console.error('[subscription] subscription query failed:', subError.message);
+    if (quotaError) console.error('[subscription] quota query failed:', quotaError.message);
+    if (projectError) console.error('[subscription] project count failed:', projectError.message);
 
     const live = await subPromise;
 
@@ -106,13 +115,7 @@ export function useSubscription(): UseSubscriptionResult {
       setSubscription(EMPTY);
     }
 
-    setQuota(quotaRow ? {
-      unitsUsed: quotaRow.standard_equivalent_used ?? 0,
-      ultimateUsed: quotaRow.ultimate_units_used ?? 0,
-      standardUsed: quotaRow.standard_units_used ?? 0,
-      unitsRemaining: null,
-      ultimateRemaining: null,
-    } : null);
+    setQuota(quotaRow ?? null);
     setProjectCount(projCount ?? 0);
     setLoading(false);
   }, []);

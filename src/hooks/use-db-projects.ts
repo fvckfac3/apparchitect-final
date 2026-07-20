@@ -58,7 +58,12 @@ export function useDbProjects() {
 			.select('*')
 			.order('updated_at', { ascending: false });
 
-		if (!error && data) {
+		if (error) {
+			console.error('[projects] fetch failed:', error.message);
+			setProjects([]);
+			setCurrentProject(null);
+			setDocumentVersions([]);
+		} else if (data) {
 			setProjects(
 				data.map((p) => ({
 					id: p.id,
@@ -87,9 +92,13 @@ export function useDbProjects() {
 			.from('document_versions')
 			.select('*')
 			.eq('project_id', projectId)
+			.eq('user_id', user?.id ?? '')
 			.order('version_number', { ascending: false });
 
-		if (!error && data) {
+		if (error) {
+			console.error('[projects] version fetch failed:', error.message);
+			setDocumentVersions([]);
+		} else if (data) {
 			setDocumentVersions(
 				data.map((v) => ({
 					id: v.id,
@@ -101,7 +110,7 @@ export function useDbProjects() {
 				}))
 			);
 		}
-	}, []);
+	}, [user]);
 
 	// Create a new project
 	const createProject = useCallback(
@@ -123,7 +132,10 @@ export function useDbProjects() {
 				.select()
 				.single();
 
-			if (error || !data) return null;
+			if (error || !data) {
+			console.error('[projects] create failed:', error?.message || 'no project returned');
+			return null;
+		}
 
 			const project: DbProject = {
 				id: data.id,

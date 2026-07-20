@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/use-subscription';
 import { startCheckout, openPortal } from '@/lib/billing/stripe-client';
+import { BillingError } from '@/lib/billing/errors';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -42,6 +43,7 @@ export default function Billing() {
   const [interval, setInterval] = useState<'month' | 'year'>('month');
   const [working, setWorking] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<'downgrade' | 'cancel' | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const tier = subscription?.tier ?? 'free';
   const status = subscription?.status ?? 'none';
@@ -50,6 +52,7 @@ export default function Billing() {
   async function handleUpgrade(target: 'pro' | 'team') {
     if (!user) return;
     setWorking('upgrade-' + target);
+    setError(null);
     try {
       const { url } = await startCheckout({
         targetTier: target,
@@ -59,7 +62,7 @@ export default function Billing() {
       });
       window.location.href = url;
     } catch (err) {
-      alert('Could not start checkout: ' + (err as Error).message);
+      setError(err instanceof BillingError ? err.userMessage : 'Could not start checkout. Please try again.');
     } finally {
       setWorking(null);
     }
@@ -68,11 +71,12 @@ export default function Billing() {
   async function handlePortal() {
     if (!user) return;
     setWorking('portal');
+    setError(null);
     try {
       const { url } = await openPortal(window.location.href);
       window.location.href = url;
     } catch (err) {
-      alert('Could not open billing portal: ' + (err as Error).message);
+      setError(err instanceof BillingError ? err.userMessage : 'Could not open the billing portal. Please try again.');
     } finally {
       setWorking(null);
     }
@@ -100,6 +104,7 @@ export default function Billing() {
           <h1 className="text-3xl font-bold text-balance">Billing</h1>
           <p className="text-muted-foreground mt-2">Manage your subscription, payment method, and invoices.</p>
         </header>
+        {error && <div role="alert" className="rounded-md border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>}
 
         <Card className="p-6">
           <div className="flex items-start justify-between flex-wrap gap-4">
@@ -233,7 +238,7 @@ export default function Billing() {
 
         {upgraded && (
           <div className="p-4 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-sm">
-            Welcome to Pro! Your subscription is active.
+            Checkout completed. Your subscription will appear here after Stripe's webhook sync completes.
             <button className="ml-3 underline" onClick={() => refetch()}>Refresh now</button>
           </div>
         )}

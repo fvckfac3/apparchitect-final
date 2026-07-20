@@ -113,29 +113,28 @@ export default function Index() {
     // Generate full PRD suite with the new generator
     try {
       const result = await generateSuite(interviewAnswers);
-      generateDocuments(interviewAnswers, result.team);
+      await addDocumentVersion(result.documents, 'Initial generation');
     } catch (err) {
       console.error('PRD generation failed:', err);
-      // Fallback to legacy generator
-      generateDocuments(interviewAnswers, team);
     }
-  }, [interviewAnswers, team, generateDocuments, generateSuite, updateProject]);
+  }, [interviewAnswers, generateSuite, updateProject, addDocumentVersion]);
 
   // Watch for document generation completion
   useEffect(() => {
-    if (phase === 'generation' && !isGenerating && documents.masterContext && currentProject) {
+    if (phase === 'generation' && !isGenerating && prdSuite && currentProject && prdProgress.phase === 'complete') {
       setPhase('review');
       setCompletedPhases((prev) => [...prev, 'generation']);
-      addDocumentVersion(documents, 'Initial generation');
+      void updateProject({ phase: 'review' });
     }
-  }, [phase, isGenerating, documents, currentProject, addDocumentVersion]);
+  }, [phase, isGenerating, prdSuite, prdProgress.phase, currentProject, updateProject]);
 
   const handleRegenerate = useCallback(async () => {
     if (!interviewAnswers) return;
     setPhase('generation');
     await updateProject({ phase: 'generation' });
-    generateDocuments(interviewAnswers, currentProject?.agentTeam || team);
-  }, [interviewAnswers, team, currentProject, generateDocuments, updateProject]);
+    const result = await generateSuite(interviewAnswers);
+    await addDocumentVersion(result.documents, 'Regeneration');
+  }, [interviewAnswers, generateSuite, updateProject, addDocumentVersion]);
 
   const handleStartOver = useCallback(() => {
     closeProject();
