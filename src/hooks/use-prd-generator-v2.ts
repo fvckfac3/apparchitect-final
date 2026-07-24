@@ -17,6 +17,7 @@ import { AGENT_CATALOG, determineRequiredAgents } from '@/data/agent-catalog';
 import { validateSuite, validateDocument, type SuiteValidationResult } from '@/lib/prd-validation';
 import { fillTemplate, checkAnswerCompleteness } from '@/lib/template-filler';
 import { enhanceDocumentBatch } from '@/lib/ai-prd-enhancer';
+import { normalizeInterviewAnswers } from '@/lib/interview-answer-normalizer';
 import type { InterviewAnswers } from '@/types/interview';
 import type { AgentTeam, Agent, AgentConnection, AgentType } from '@/types/agents';
 import type { GeneratedDocuments, Document } from '@/types/documents';
@@ -72,13 +73,14 @@ export interface PRDSuiteOutputV2 {
 
 function convertToLegacyFormat(suite: PRDSuiteOutputV2, team: AgentTeam): GeneratedDocuments {
 	// Extract master context from base documents
-	const masterContent = suite.baseDocuments.get('core-systems-template') || '';
+	const masterContent = suite.baseDocuments.get('project-brief-template') || suite.baseDocuments.get('core-systems-template') || '';
 	
 	const masterContext: Document = {
 		id: 'master-context',
-		title: 'Core Systems PRD',
+		title: 'Project Brief',
 		type: 'master',
 		content: masterContent,
+		generatedAt: new Date(),
 	};
 	
 	// Convert agent documents to legacy array format
@@ -175,8 +177,22 @@ function synthesizeTeam(answers: InterviewAnswers): AgentTeam {
 function generateAgentPRDV2(agent: Agent, answers: InterviewAnswers): string {
 	const agentDef = AGENT_CATALOG.find(a => a.type === agent.type);
 	const responsibilities = agentDef?.responsibilities || agent.responsibilities || [];
+	const context = [
+		`Product: ${answers.productName || 'Product'}`,
+		`Description: ${answers.productDescription || ''}`,
+		`Primary users: ${answers.primaryUser || ''}`,
+		`Core features: ${answers.coreFeatures || ''}`,
+		`Data and content: ${answers.dataAndContent || ''}`,
+		`Integrations: ${answers.integrations || ''}`,
+		`Compliance: ${answers.complianceNeeds || ''}`,
+		`Technical constraints: ${answers.technicalPreferences || ''}`,
+	].join('\n');
 	
 	return `# ${answers.productName || 'Product'} – ${agent.name} Agent PRD
+
+**Project Context**
+
+${context}
 
 **Version:** 2.0
 **Status:** Authoritative · Build-Ready
@@ -522,7 +538,8 @@ export function usePRDGeneratorV2() {
 	const [aiStatus, setAiStatus] = useState<import('@/components/Generation/AIStatusBadge').AIStatusState>({ kind: 'idle' });
 
 	// Main generation function
-	const generateSuite = useCallback(async (answers: InterviewAnswers): Promise<{ suite: PRDSuiteOutputV2; team: AgentTeam; documents: GeneratedDocuments }> => {
+	const generateSuite = useCallback(async (rawAnswers: InterviewAnswers): Promise<{ suite: PRDSuiteOutputV2; team: AgentTeam; documents: GeneratedDocuments }> => {
+		const answers = normalizeInterviewAnswers(rawAnswers, rawAnswers.productName || 'Product');
 		const startTime = Date.now();
 		setIsGenerating(true);
 		setError(null);
@@ -555,7 +572,7 @@ export function usePRDGeneratorV2() {
 			
 			// Phase 3: Generate base PRDs from V2 registry
 			const v2Docs = getAllPRDDocumentsV2();
-			const totalDocs = v2Docs.length + team.agents.length + 3; // +3 for collab, guide, index
+			const totalDocs = v2Docs.length + team.agents.length + 2; // collaboration map and user guide
 			
 			setProgress({
 				phase: 'generating_base',

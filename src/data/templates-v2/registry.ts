@@ -18,6 +18,7 @@
 
 import type { InterviewAnswers } from '@/types/interview';
 import type { AgentTeam } from '@/types/agents';
+import { normalizeInterviewAnswers } from '@/lib/interview-answer-normalizer';
 
 import { v2Templates, type V2TemplateKey } from '@/data/spec/loader';
 
@@ -42,10 +43,70 @@ function applyTemplate(
   template: string,
   answers: InterviewAnswers,
 ): string {
-  const name = answers.productName || 'Product';
-  return template
-    .replaceAll('[Product Name]', name)
-    .replaceAll('[Date]', formatDate());
+  const normalized = normalizeInterviewAnswers(answers, answers.productName || 'Product');
+  const replacements: Record<string, string> = {
+    '[Product Name]': normalized.productName || 'Product',
+    '[Name]': normalized.productName || 'Product',
+    '[Product]': normalized.productName || 'Product',
+    '[Date]': formatDate(),
+    '[DATE]': formatDate(),
+    '[Current Date]': formatDate(),
+    '[Generation Date]': new Date().toISOString(),
+    '[Product Description]': normalized.productDescription || 'Product description pending confirmation.',
+    '[One-line Description]': normalized.productDescription || 'Product description pending confirmation.',
+    '[Description]': normalized.productDescription || 'Description pending confirmation.',
+    '[Problem Statement]': normalized.problemSolved || 'Problem statement pending confirmation.',
+    '[Unique Value]': normalized.uniqueValue || 'Unique value pending confirmation.',
+    '[Product Type]': normalized.productType || 'Web application',
+    '[Primary User]': normalized.primaryUser || 'Primary user pending confirmation.',
+    '[User Context]': normalized.userContext || 'User context pending confirmation.',
+    '[Core Systems]': normalized.coreSystems || 'Core systems pending confirmation.',
+    '[Core Features]': normalized.coreFeatures || 'Core features pending confirmation.',
+    '[User Flows]': normalized.userFlows || 'User flows pending confirmation.',
+    '[System States]': normalized.systemStates || 'IDLE, LOADING, READY, ERROR, COMPLETE',
+    '[Data Collected]': normalized.dataCollected || 'Data scope pending confirmation.',
+    '[Compliance Requirements]': Array.isArray(normalized.complianceRequirements) ? normalized.complianceRequirements.join(', ') : normalized.complianceRequirements || 'Compliance scope pending confirmation.',
+    '[User Roles]': normalized.userRoles || 'Account owner, member, viewer',
+    '[Role Permissions]': normalized.rolePermissions || 'Permissions pending confirmation.',
+    '[Tenancy Model]': normalized.tenancyModel || 'Multi-tenant logical isolation',
+    '[Tech Preferences]': normalized.techPreferences || 'Managed TypeScript web stack',
+    '[Platforms]': normalized.platforms || 'Web',
+    '[Performance Requirements]': normalized.performanceRequirements || 'Performance targets pending confirmation.',
+    '[External Services]': normalized.externalServices || 'No external services approved yet.',
+    '[Existing Integrations]': normalized.existingIntegrations || 'None approved yet.',
+    '[Uses AI]': normalized.usesAI || 'No',
+    '[Content Moderation]': normalized.contentModeration || 'Validate generated output before display or persistence.',
+    '[Visual Style]': normalized.visualStyle || 'Professional, clear, and accessible.',
+    '[Brand Colors]': normalized.brandColors || 'Approved brand tokens pending confirmation.',
+    '[Key Screens]': normalized.keyScreens || 'Landing, authentication, onboarding, dashboard, primary workflow, settings',
+    '[Accessibility]': normalized.accessibility || 'WCAG 2.2 AA',
+    '[Data Entities]': normalized.dataEntities || 'User, workspace, project, document, audit event',
+    '[Entity Relationships]': normalized.entityRelationships || 'Child records reference their owning workspace.',
+    '[Special Data Requirements]': normalized.specialDataRequirements || 'Least privilege, encryption, retention, and auditability.',
+    '[Critical Failures]': normalized.criticalFailures || 'Authentication, authorization, data loss, integration, and workflow failures.',
+    '[Error Communication]': normalized.errorCommunication || 'Plain-language message, preserved work, safe retry, escalation path.',
+    '[Testing Priorities]': normalized.testingPriorities || 'Core functionality, security, accessibility, and performance.',
+    '[Testing Approach]': typeof normalized.testingApproach === 'string' ? normalized.testingApproach : normalized.testingApproach?.join(', ') || 'Unit, integration, end-to-end, accessibility, security',
+    '[Business Model]': normalized.businessModel || 'Subscription',
+    '[Pricing Tiers]': normalized.pricingTiers || 'Pricing pending confirmation.',
+    '[Gated Features]': normalized.gatedFeatures || 'Plan limits pending confirmation.',
+    '[Target Users]': normalized.targetUsers || normalized.primaryUser || 'Target users pending confirmation.',
+    '[Auth and Users]': normalized.authAndUsers || normalized.userRoles || 'Authenticated workspace users',
+    '[Payments and Commerce]': normalized.paymentsAndCommerce || normalized.businessModel || 'No payments specified.',
+    '[Real-time Features]': normalized.realtimeFeatures || 'No real-time behavior specified.',
+    '[Integrations]': normalized.integrations || 'No integrations approved yet.',
+    '[Data and Content]': normalized.dataAndContent || normalized.dataEntities || 'Data scope pending confirmation.',
+    '[Scale Expectations]': normalized.scaleExpectations || 'Launch cohort first; measure before expansion.',
+    '[Technical Preferences]': normalized.technicalPreferences || normalized.techPreferences || 'Managed TypeScript web stack',
+    '[Compliance Needs]': normalized.complianceNeeds || normalized.complianceRequirements || 'Compliance scope pending confirmation.',
+    '[Brand and Design]': normalized.brandAndDesign || normalized.visualStyle || 'Professional, clear, and accessible.',
+    '[Additional Context]': normalized.additionalContext || 'No additional context supplied.',
+  };
+  let result = template;
+  for (const [placeholder, value] of Object.entries(replacements)) {
+    result = result.replaceAll(placeholder, value);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
