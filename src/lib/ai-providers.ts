@@ -24,9 +24,18 @@ export interface ChatResponse {
 }
 
 export async function chat(req: ChatRequest): Promise<ChatResponse> {
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    accept: 'application/json',
+  };
+  const { supabase } = await import('@/integrations/supabase/client');
+  if (supabase) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) headers.authorization = `Bearer ${session.access_token}`;
+  }
   const response = await fetch('/api/ai/chat', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    headers,
     body: JSON.stringify(req),
     signal: AbortSignal.timeout(125_000),
   });
