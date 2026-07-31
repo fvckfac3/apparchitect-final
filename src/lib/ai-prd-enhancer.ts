@@ -82,25 +82,11 @@ export async function enhanceDocument(
     maxTokens?: number;
     temperature?: number;
     timeoutMs?: number;
+    onProviderUsed?: (provider: string, model: string, fellBack: boolean) => void;
   } = {}
 ): Promise<EnhancementResult> {
   const start = Date.now();
-  const { maxTokens = 4096, temperature = 0.3, timeoutMs = 120_000 } = options;
-
-  // If there are no [USER-UNSPECIFIED] markers and the doc is already
-  // dense, skip the round-trip to save tokens.
-  if (!document.includes('[USER-UNSPECIFIED]') && document.length > 2000) {
-    return {
-      content: document,
-      enhanced: false,
-      provider: null,
-      model: null,
-      inputTokens: 0,
-      outputTokens: 0,
-      latencyMs: 0,
-      error: null,
-    };
-  }
+  const { maxTokens = 4096, temperature = 0.3, timeoutMs = 120_000, onProviderUsed } = options;
 
   try {
     const response: ChatResponse = await Promise.race([
@@ -117,6 +103,11 @@ export async function enhanceDocument(
       ),
     ]);
 
+    if (!response.content.trim()) {
+      throw new Error('AI returned empty enhancement content');
+    }
+
+    onProviderUsed?.(response.provider, response.model, response.fellBack);
     return {
       content: response.content,
       enhanced: true,
@@ -150,6 +141,7 @@ export interface BatchEnhancementOptions {
   concurrency?: number;
   maxTokens?: number;
   onProgress?: (completed: number, total: number, currentTitle: string) => void;
+  onProviderUsed?: (provider: string, model: string, fellBack: boolean) => void;
 }
 
 export async function enhanceDocumentBatch(
@@ -157,7 +149,7 @@ export async function enhanceDocumentBatch(
   answers: InterviewAnswers,
   options: BatchEnhancementOptions = {}
 ): Promise<Map<string, EnhancementResult>> {
-  const { concurrency = 3, onProgress } = options;
+  const { concurrency = 3, maxTokens = 4096, onProgress, onProviderUsed } = options;
   const results = new Map<string, EnhancementResult>();
   const queue = [...documents];
   let completed = 0;
@@ -166,7 +158,10 @@ export async function enhanceDocumentBatch(
     while (queue.length > 0) {
       const doc = queue.shift();
       if (!doc) return;
-      const result = await enhanceDocument(doc.content, answers, doc.title, doc.category);
+      const result = await enhanceDocument(doc.content, answers, doc.title, doc.category, {
+        maxTokens,
+        onProviderUsed,
+      });
       results.set(doc.id, result);
       completed++;
       onProgress?.(completed, documents.length, doc.title);
