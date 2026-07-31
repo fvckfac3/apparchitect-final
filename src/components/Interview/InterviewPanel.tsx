@@ -128,7 +128,8 @@ export function InterviewPanel({ onComplete }: InterviewPanelProps) {
     goToNextRound,
     progress,
     resetInterview,
-    isComplete
+    isComplete,
+    isGeneratingFollowUp
   } = useInterview();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -293,21 +294,17 @@ export function InterviewPanel({ onComplete }: InterviewPanelProps) {
       <div data-ev-id="ev_14ca489b20" className="flex-shrink-0 p-3 bg-cyan/20 border-b-2 border-cyan">
         <button data-ev-id="ev_41d39bd7d4"
         onClick={goToNextRound}
-        disabled={!canProceed}
+        disabled={!canProceed || isGeneratingFollowUp}
         className={`w-full py-3 px-4 rounded-lg font-mono text-sm font-bold flex items-center justify-center gap-2 transition-all ${
         canProceed ?
         'bg-cyan text-deep hover:bg-cyan/90 cursor-pointer' :
         'bg-surface text-text-slate cursor-not-allowed'}`
         }>
 
-          {canProceed ?
-          <>
+          {isGeneratingFollowUp ? 'ANALYZING YOUR ANSWERS…' : canProceed ? <>
               CONTINUE TO NEXT STEP
               <ArrowRight className="w-5 h-5" />
-            </> :
-
-          'Answer required questions (*) to continue'
-          }
+            </> : 'Answer required questions (*) to continue'}
         </button>
       </div>
 
@@ -376,19 +373,18 @@ export function InterviewPanel({ onComplete }: InterviewPanelProps) {
       <div data-ev-id="ev_02227c58c6" className="flex-shrink-0 p-3 border-t-2 border-cyan bg-panel">
         <button data-ev-id="ev_fa3489186a"
         onClick={goToNextRound}
-        disabled={!canProceed}
+        disabled={!canProceed || isGeneratingFollowUp}
         className={`w-full py-3 px-4 rounded-lg font-mono text-sm font-bold flex items-center justify-center gap-2 transition-all ${
         canProceed ?
         'bg-cyan text-deep hover:bg-cyan/90 cursor-pointer' :
         'bg-surface text-text-slate cursor-not-allowed'}`
         }>
 
-          {canProceed ?
+          {isGeneratingFollowUp ? 'ANALYZING YOUR ANSWERS…' : canProceed ?
           <>
               CONTINUE
               <ArrowRight className="w-5 h-5" />
             </> :
-
           'Answer required questions (*) first'
           }
         </button>

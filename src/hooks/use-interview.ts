@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { InterviewState, InterviewPhase, InterviewAnswers, InterviewRound } from '@/types';
+import { generateAdaptiveFollowUp } from '@/lib/adaptive-interview';
 
 /**
  * Enhanced interview question with guidance for long-form answers
@@ -299,6 +300,7 @@ export function useInterview() {
 	const [state, setState] = useState<InterviewState>(getInitialState);
 	const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
 	const [draftAnswers, setDraftAnswers] = useState<Record<string, string>>(getDraftAnswers);
+	const [isGeneratingFollowUp, setIsGeneratingFollowUp] = useState(false);
 	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	// Auto-save drafts with debounce
@@ -346,8 +348,11 @@ export function useInterview() {
 	const getQuestionsForCurrentRound = useCallback((): EnhancedQuestion[] => {
 		const round = getCurrentRound();
 		if (!round) return [];
-		return round.questions;
-	}, [getCurrentRound]);
+		const adaptiveQuestion = state.adaptiveQuestions?.[`adaptive-${state.currentPhase}`];
+		return adaptiveQuestion && !state.answers[adaptiveQuestion.id]
+			? [...round.questions, adaptiveQuestion as EnhancedQuestion]
+			: round.questions;
+	}, [getCurrentRound, state.adaptiveQuestions, state.answers]);
 
 	const updateAnswers = useCallback(
 		(updates: Partial<InterviewAnswers>) => {
@@ -371,15 +376,42 @@ export function useInterview() {
 		return newAnswers;
 	}, [state.answers, draftAnswers]);
 
-	const goToNextRound = useCallback(() => {
-		// Commit drafts first
+	const goToNextRound = useCallback(async () => {
 		const newAnswers = commitDraftsToAnswers();
-		
 		const roundsForPhase = INTERVIEW_ROUNDS.filter((r) => r.id === state.currentPhase);
 		const phaseRoundIndex = currentRoundIndex % Math.max(1, roundsForPhase.length);
 
+		if (phaseRoundIndex >= roundsForPhase.length - 1 && state.currentPhase !== 'complete') {
+			setIsGeneratingFollowUp(true);
+			const adaptiveQuestion = await generateAdaptiveFollowUp(newAnswers, {
+				phase: state.currentPhase,
+				title: roundsForPhase[phaseRoundIndex]?.title || state.currentPhase,
+				subtitle: roundsForPhase[phaseRoundIndex]?.subtitle || '',
+				questions: roundsForPhase.flatMap((round) => round.questions.map(({ id, text }) => ({ id, text }))),
+			});
+			setIsGeneratingFollowUp(false);
+
+			if (adaptiveQuestion && !state.adaptiveQuestions?.[adaptiveQuestion.id]) {
+				saveState({
+					...state,
+					answers: newAnswers,
+					adaptiveQuestions: {
+						...state.adaptiveQuestions,
+						[adaptiveQuestion.id]: {
+							...adaptiveQuestion,
+							type: 'textarea',
+							required: true,
+							minChars: 60,
+							targetChars: 180,
+						},
+					},
+				});
+				setDraftAnswers((previous) => ({ ...previous, [adaptiveQuestion.id]: '' }));
+				return;
+			}
+		}
+
 		if (phaseRoundIndex < roundsForPhase.length - 1) {
-			// Save answers and move to next round in same phase
 			saveState({ ...state, answers: newAnswers });
 			setCurrentRoundIndex((prev) => prev + 1);
 		} else {
@@ -395,13 +427,12 @@ export function useInterview() {
 				saveState(newState);
 				setCurrentRoundIndex(0);
 			} else {
-				const newState = {
+				saveState({
 					...state,
 					currentPhase: 'complete' as InterviewPhase,
 					completedPhases: [...state.completedPhases, state.currentPhase],
 					answers: newAnswers,
-				};
-				saveState(newState);
+				});
 			}
 		}
 	}, [state, currentRoundIndex, saveState, commitDraftsToAnswers]);
@@ -468,6 +499,7 @@ export function useInterview() {
 		progress,
 		resetInterview,
 		isComplete: state.currentPhase === 'complete',
+		isGeneratingFollowUp,
 	};
 }
 

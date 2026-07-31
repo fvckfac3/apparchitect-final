@@ -182,6 +182,16 @@ export interface InterviewState {
 	answers: InterviewAnswers;
 	completedPhases: InterviewPhase[];
 	flags: string[];
+	adaptiveQuestions?: Record<string, {
+		id: string;
+		text: string;
+		type: 'textarea';
+		placeholder: string;
+		guidance: string;
+		required?: boolean;
+		minChars?: number;
+		targetChars?: number;
+	}>;
 	// Legacy fields for backwards compatibility
 	currentRound?: number;
 }
