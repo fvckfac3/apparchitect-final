@@ -28,11 +28,19 @@ function getAllDocumentsMarkdown(documents: GeneratedDocuments, projectName: str
     sections.push(`# ${documents.masterContext.title}\n\n${documents.masterContext.content}`);
   }
 
+  if (documents.basePRDs && documents.basePRDs.length > 0) {
+    sections.push(
+      documents.basePRDs
+        .map((doc) => `# ${doc.title}\n\n${doc.content}`)
+        .join(divider)
+    );
+  }
+
   if (documents.agentPRDs.length > 0) {
     sections.push(
-      documents.agentPRDs.
-      map((doc) => `# ${doc.title}\n\n${doc.content}`).
-      join(divider)
+      documents.agentPRDs
+        .map((doc) => `# ${doc.title}\n\n${doc.content}`)
+        .join(divider)
     );
   }
 

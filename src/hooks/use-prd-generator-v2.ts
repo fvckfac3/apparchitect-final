@@ -72,7 +72,7 @@ export interface PRDSuiteOutputV2 {
 // ============================================================================
 
 function convertToLegacyFormat(suite: PRDSuiteOutputV2, team: AgentTeam): GeneratedDocuments {
-	// Extract master context from base documents
+	// Extract master context from the canonical Project Brief.
 	const masterContent = suite.baseDocuments.get('project-brief-template') || suite.baseDocuments.get('core-systems-template') || '';
 	
 	const masterContext: Document = {
@@ -82,6 +82,21 @@ function convertToLegacyFormat(suite: PRDSuiteOutputV2, team: AgentTeam): Genera
 		content: masterContent,
 		generatedAt: new Date(),
 	};
+
+	const basePRDs: Document[] = [];
+	for (const doc of getAllPRDDocumentsV2()) {
+		if (doc.id === 'project-brief-template' || doc.category === 'agent' || doc.category === 'auxiliary') continue;
+		const content = suite.baseDocuments.get(doc.id);
+		if (content) {
+			basePRDs.push({
+				id: doc.id,
+				title: doc.title,
+				type: 'base',
+				content,
+				generatedAt: new Date(),
+			});
+		}
+	}
 	
 	// Convert agent documents to legacy array format
 	const agentPRDs: Document[] = [];
@@ -111,6 +126,7 @@ function convertToLegacyFormat(suite: PRDSuiteOutputV2, team: AgentTeam): Genera
 	
 	return {
 		masterContext,
+		basePRDs,
 		agentPRDs,
 		collaborationMap,
 		setupGuide,
@@ -530,6 +546,7 @@ export function usePRDGeneratorV2() {
 	const [suite, setSuite] = useState<PRDSuiteOutputV2 | null>(null);
 	const [documents, setDocuments] = useState<GeneratedDocuments>({
 		masterContext: null,
+		basePRDs: [],
 		agentPRDs: [],
 		collaborationMap: null,
 		setupGuide: null,

@@ -73,6 +73,18 @@ export interface EnhancementResult {
   error: string | null;
 }
 
+function preserveTemplatePlaceholders(original: string, enhanced: string): string {
+  const protectedTokens = Array.from(new Set(original.match(/\\[[^\\]\\n]{1,120}\\]/g) || []));
+  let result = enhanced;
+  for (const token of protectedTokens) {
+    if (result.includes(token)) continue;
+    const escaped = token.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+    const fallback = original.match(new RegExp(`^.{0,120}${escaped}.{0,180}$`, 'gm'))?.[0];
+    if (fallback) result += `\\n\\n${fallback}`;
+  }
+  return result;
+}
+
 export async function enhanceDocument(
   document: string,
   answers: InterviewAnswers,
@@ -109,7 +121,7 @@ export async function enhanceDocument(
 
     onProviderUsed?.(response.provider, response.model, response.fellBack);
     return {
-      content: response.content,
+      content: preserveTemplatePlaceholders(document, response.content),
       enhanced: true,
       provider: response.provider,
       model: response.model,

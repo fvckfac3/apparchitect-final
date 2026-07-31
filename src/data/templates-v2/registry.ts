@@ -151,7 +151,8 @@ interface CuratedEntry {
 
 const CURATED: CuratedEntry[] = [
   // === Master & base PRDs ===
-  { id: 'master-index-template', filename: '14-master-index.md', title: 'Master PRD Index', category: 'base', precedence: 1, informationDensity: 'O(D) where D = suite documents', specKey: 'masterIndex' },
+  { id: 'project-brief-template', filename: '01-project-brief.md', title: 'Project Brief', category: 'base', precedence: 1, informationDensity: 'O(1) — one product definition referenced across the suite', specKey: 'projectBrief' },
+  { id: 'master-index-template', filename: '14-master-index.md', title: 'Master PRD Index', category: 'base', precedence: 2, informationDensity: 'O(D) where D = suite documents', specKey: 'masterIndex' },
   { id: 'safety-prd-template', filename: '04-safety-privacy.md', title: 'Safety, Privacy & Control PRD', category: 'base', precedence: 0, informationDensity: 'O(R) where R = risk categories', specKey: 'safetyPrivacy' },
   { id: 'core-systems-template', filename: '03-core-systems.md', title: 'Core Systems PRD', category: 'base', precedence: 3, informationDensity: 'O(N·F) where N = entities, F = features', specKey: 'coreSystems' },
   { id: 'technical-template', filename: '05-technical-architecture.md', title: 'Technical Architecture PRD', category: 'base', precedence: 4, informationDensity: 'O(C) where C = components', specKey: 'techArch' },

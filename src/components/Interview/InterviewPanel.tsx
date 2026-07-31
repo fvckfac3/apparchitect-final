@@ -161,10 +161,11 @@ export function InterviewPanel({ onComplete }: InterviewPanelProps) {
   }, [saveTimeout]);
 
   // Check if user can proceed - ALWAYS allow if ANY answer is provided
-  const canProceed = questions.some((q) => {
+  const canProceed = questions.every((q) => {
+    if (!q.required) return true;
     const answer = getAnswer(q.id);
-    return answer && answer.trim().length > 0;
-  }) || questions.every((q) => !q.required);
+    return Boolean(answer && answer.trim().length > 0);
+  });
 
   const renderQuestion = (question: EnhancedQuestion, index: number) => {
     const answer = getAnswer(question.id);

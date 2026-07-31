@@ -1,4 +1,4 @@
-export type DocumentType = 'master' | 'agent' | 'collaboration' | 'setup';
+export type DocumentType = 'master' | 'base' | 'agent' | 'collaboration' | 'setup';
 
 export interface Document {
 	id: string;
@@ -18,6 +18,7 @@ export interface DocumentSection {
 
 export interface GeneratedDocuments {
 	masterContext: Document | null;
+	basePRDs?: Document[];
 	agentPRDs: Document[];
 	collaborationMap: Document | null;
 	setupGuide: Document | null;

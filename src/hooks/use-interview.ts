@@ -391,22 +391,24 @@ export function useInterview() {
 			});
 			setIsGeneratingFollowUp(false);
 
-			if (adaptiveQuestion && !state.adaptiveQuestions?.[adaptiveQuestion.id]) {
+			if (adaptiveQuestion && !state.adaptiveQuestions?.[`adaptive-${state.currentPhase}`]) {
+				const storedQuestion = {
+					...adaptiveQuestion,
+					id: `adaptive-${state.currentPhase}`,
+					type: 'textarea' as const,
+					required: true,
+					minChars: 60,
+					targetChars: 180,
+				};
 				saveState({
 					...state,
 					answers: newAnswers,
 					adaptiveQuestions: {
 						...state.adaptiveQuestions,
-						[adaptiveQuestion.id]: {
-							...adaptiveQuestion,
-							type: 'textarea',
-							required: true,
-							minChars: 60,
-							targetChars: 180,
-						},
+						[`adaptive-${state.currentPhase}`]: storedQuestion,
 					},
 				});
-				setDraftAnswers((previous) => ({ ...previous, [adaptiveQuestion.id]: '' }));
+				setDraftAnswers((previous) => ({ ...previous, [storedQuestion.id]: '' }));
 				return;
 			}
 		}

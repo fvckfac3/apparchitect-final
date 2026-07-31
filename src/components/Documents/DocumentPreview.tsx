@@ -24,10 +24,11 @@ interface DocumentPreviewProps {
   onRestoreVersion?: (versionId: string) => void;
 }
 
-type TabId = 'master' | 'agents' | 'collaboration' | 'setup';
+type TabId = 'master' | 'base' | 'agents' | 'collaboration' | 'setup';
 
 const TABS: {id: TabId;label: string;icon: typeof FileText;}[] = [
 { id: 'master', label: 'Master Context', icon: FileText },
+{ id: 'base', label: 'PRD Documents', icon: FileText },
 { id: 'agents', label: 'Agent PRDs', icon: Users },
 { id: 'collaboration', label: 'Collaboration', icon: GitBranch },
 { id: 'setup', label: 'Setup Guide', icon: BookOpen }];
@@ -371,6 +372,7 @@ export function DocumentPreview({
   const [activeTab, setActiveTab] = useState<TabId>('master');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedAgentDoc, setSelectedAgentDoc] = useState<string | null>(null);
+  const [selectedBaseDoc, setSelectedBaseDoc] = useState<string | null>(null);
 
   const handleCopy = (content: string, id: string) => {
     const textarea = document.createElement('textarea');
@@ -389,6 +391,11 @@ export function DocumentPreview({
     switch (activeTab) {
       case 'master':
         return documents.masterContext;
+      case 'base':
+        if (selectedBaseDoc) {
+          return documents.basePRDs?.find((d) => d.id === selectedBaseDoc) || null;
+        }
+        return documents.basePRDs?.[0] || null;
       case 'agents':
         if (selectedAgentDoc) {
           return documents.agentPRDs.find((d) => d.id === selectedAgentDoc) || null;
@@ -411,7 +418,7 @@ export function DocumentPreview({
   }
 
   // Empty state
-  if (!documents.masterContext && documents.agentPRDs.length === 0) {
+  if (!documents.masterContext && !(documents.basePRDs?.length) && documents.agentPRDs.length === 0) {
     return <EmptyState />;
   }
 
@@ -424,6 +431,7 @@ export function DocumentPreview({
             const isActive = activeTab === tab.id;
             const hasContent =
             tab.id === 'master' && documents.masterContext ||
+            tab.id === 'base' && documents.basePRDs && documents.basePRDs.length > 0 ||
             tab.id === 'agents' && documents.agentPRDs.length > 0 ||
             tab.id === 'collaboration' && documents.collaborationMap ||
             tab.id === 'setup' && documents.setupGuide;
@@ -462,6 +470,32 @@ export function DocumentPreview({
 					<ExportMenu documents={documents} projectName={projectName} />
 				</div>
 			</div>
+
+			{/* Base PRD selector */}
+			<AnimatePresence mode="wait">
+				{activeTab === 'base' && documents.basePRDs && documents.basePRDs.length > 0 &&
+        <motion.div
+          className="flex gap-2 p-3 sm:p-4 border-b border-border overflow-x-auto"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: duration.medium, ease: easing.outQuint }}>
+          {documents.basePRDs.map((doc, index) =>
+            <motion.button
+              key={doc.id}
+              onClick={() => setSelectedBaseDoc(doc.id)}
+              className={`px-3 py-1.5 rounded-md font-mono text-[10px] font-bold uppercase tracking-[1px] border whitespace-nowrap ${(selectedBaseDoc || documents.basePRDs?.[0]?.id) === doc.id ? 'bg-cyan/20 border-cyan text-cyan' : 'bg-surface border-border text-text-light hover:border-cyan/50'}`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: duration.fast, delay: index * 0.05 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}>
+              {doc.title}
+            </motion.button>
+          )}
+        </motion.div>
+      }
+			</AnimatePresence>
 
 			{/* Agent selector */}
 			<AnimatePresence mode="wait">
